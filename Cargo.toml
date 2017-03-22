@@ -1,0 +1,8 @@
+[package]
+name = "mvp"
+version = "0.1.0"
+authors = ["Konrad Borowski <xfix@protonmail.com>"]
+
+[dependencies]
+[dependencies.mvp-parser]
+path = "parser"
