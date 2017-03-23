@@ -84,8 +84,14 @@ pub enum BinaryOperator {
 }
 
 #[derive(Debug, Eq, PartialEq)]
+pub struct Number {
+    pub value: u32,
+    pub width: Option<usize>,
+}
+
+#[derive(Debug, Eq, PartialEq)]
 pub enum Expression {
-    Number { value: u32, width: Option<usize> },
+    Number(Number),
     Variable(Label),
     Binary(BinaryOperator, Box<Expression>, Box<Expression>),
     Call(VariableName, Vec<Expression>),

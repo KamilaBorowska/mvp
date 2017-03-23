@@ -1,22 +1,26 @@
 extern crate mvp_parser;
 
-use mvp_parser::ast::{BinaryOperator, Expression, VariableName};
+use mvp_parser::ast::{BinaryOperator, Expression, Number, VariableName};
 use mvp_parser::parser::{self, IResult};
+
+fn number(number: u32) -> Box<Expression> {
+    Box::new(Expression::Number(Number {
+        value: number,
+        width: None,
+    }))
+}
 
 #[test]
 fn addition() {
     let input = "2 + 3 + 4";
     let result = parser::expression(input);
     let addition = BinaryOperator::Add;
-    let expected = IResult::Done("", Expression::Binary(
-        addition,
-        Box::new(Expression::Binary(
-            addition,
-            Box::new(Expression::Number { value: 2, width: None }),
-            Box::new(Expression::Number { value: 3, width: None }),
-        )),
-        Box::new(Expression::Number { value: 4, width: None }),
-    ));
+    let expected = IResult::Done("",
+                                 Expression::Binary(addition,
+                                                    Box::new(Expression::Binary(addition,
+                                                                                number(2),
+                                                                                number(3))),
+                                                    number(4)));
     assert_eq!(result, expected);
 }
 
@@ -24,15 +28,13 @@ fn addition() {
 fn multiplication() {
     let input = "20 * 30 / 40";
     let result = parser::expression(input);
-    let expected = IResult::Done("", Expression::Binary(
-        BinaryOperator::Div,
-        Box::new(Expression::Binary(
-            BinaryOperator::Mul,
-            Box::new(Expression::Number { value: 20, width: None }),
-            Box::new(Expression::Number { value: 30, width: None }),
-        )),
-        Box::new(Expression::Number { value: 40, width: None }),
-    ));
+    let expected =
+        IResult::Done("",
+                      Expression::Binary(BinaryOperator::Div,
+                                         Box::new(Expression::Binary(BinaryOperator::Mul,
+                                                                     number(20),
+                                                                     number(30))),
+                                         number(40)));
     assert_eq!(result, expected);
 }
 
@@ -47,20 +49,20 @@ fn precedence() {
             BinaryOperator::Sub,
             Box::new(Expression::Binary(
                 BinaryOperator::Add,
-                Box::new(Expression::Number { value: 2, width: None }),
+                number(2),
                 Box::new(Expression::Binary(
                     BinaryOperator::Mul,
-                    Box::new(Expression::Number { value: 3, width: None }),
-                    Box::new(Expression::Number { value: 4, width: None }),
+                    number(3),
+                    number(4),
                 )),
             )),
             Box::new(Expression::Binary(
                 BinaryOperator::Div,
-                Box::new(Expression::Number { value: 5, width: None }),
-                Box::new(Expression::Number { value: 6, width: None }),
+                number(5),
+                number(6),
             )),
         )),
-        Box::new(Expression::Number { value: 7, width: None }),
+        number(7),
     ));
     assert_eq!(result, expected);
 }
@@ -69,15 +71,13 @@ fn precedence() {
 fn parens() {
     let input = " ( 2 + 3 ) * 4 ";
     let result = parser::expression(input);
-    let expected = IResult::Done("", Expression::Binary(
-        BinaryOperator::Mul,
-        Box::new(Expression::Binary(
-            BinaryOperator::Add,
-            Box::new(Expression::Number { value: 2, width: None }),
-            Box::new(Expression::Number { value: 3, width: None }),
-        )),
-        Box::new(Expression::Number { value: 4, width: None }),
-    ));
+    let expected =
+        IResult::Done("",
+                      Expression::Binary(BinaryOperator::Mul,
+                                         Box::new(Expression::Binary(BinaryOperator::Add,
+                                                                     number(2),
+                                                                     number(3))),
+                                         number(4)));
     assert_eq!(result, expected);
 }
 
@@ -94,10 +94,7 @@ fn call() {
     let result = parser::expression(input);
     let expected = IResult::Done("",
                                  Expression::Call(VariableName(String::from("sqrt")),
-                                                  vec![Expression::Number {
-                                                           value: 42,
-                                                           width: None,
-                                                       }]));
+                                                  vec![*number(42)]));
     assert_eq!(result, expected);
 }
 
@@ -110,26 +107,23 @@ fn complex_calls() {
         Box::new(Expression::Call(
             VariableName(String::from("f")),
             vec![
-                Expression::Number { value: 1, width: None },
+                Expression::Number(Number { value: 1, width: None }),
                 Expression::Binary(
                     BinaryOperator::Add,
                     Box::new(Expression::Binary(
                         BinaryOperator::Add,
-                        Box::new(Expression::Number { value: 8, width: None }),
+                        number(8),
                         Box::new(Expression::Call(
                             VariableName(String::from("g")),
-                            vec![
-                                Expression::Number { value: 2, width: None },
-                                Expression::Number { value: 3, width: None },
-                            ],
+                            vec![*number(2), *number(3)],
                         )),
                     )),
-                    Box::new(Expression::Number { value: 9, width: None }),
+                    number(9),
                 ),
-                Expression::Number { value: 4, width: None },
+                Expression::Number(Number { value: 4, width: None }),
             ],
         )),
-        Box::new(Expression::Number { value: 2, width: None }),
+        number(2),
     ));
     assert_eq!(result, expected);
 }
@@ -146,9 +140,9 @@ fn hex_digits() {
     let input = " $ Fe ";
     let result = parser::expression(input);
     let expected = IResult::Done("",
-                                 Expression::Number {
+                                 Expression::Number(Number {
                                      value: 0xFE,
                                      width: Some(2),
-                                 });
+                                 }));
     assert_eq!(result, expected);
 }
