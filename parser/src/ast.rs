@@ -86,7 +86,14 @@ pub enum BinaryOperator {
 #[derive(Debug, Eq, PartialEq)]
 pub struct Number {
     pub value: u32,
-    pub width: Option<usize>,
+    pub width: NumberWidth,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum NumberWidth {
+    None,
+    OneByte,
+    TwoBytes,
 }
 
 #[derive(Debug, Eq, PartialEq)]

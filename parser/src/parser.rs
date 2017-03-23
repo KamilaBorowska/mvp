@@ -6,7 +6,7 @@
 //! text left to parse, and second is retrieved AST value.
 //! `IResult::Error` means that parse did fail.
 
-use ast::{BinaryOperator, Expression, Number, Statement, VariableName};
+use ast::{BinaryOperator, Expression, Number, NumberWidth, Statement, VariableName};
 
 use std::str::{self, FromStr};
 
@@ -57,12 +57,12 @@ named!(
 /// # Examples
 ///
 ///     use mvp_parser::parser::{self, IResult};
-///     use mvp_parser::ast::{Expression, Number, Statement, VariableName};
+///     use mvp_parser::ast::{Expression, Number, NumberWidth, Statement, VariableName};
 ///
 ///     let parsed = parser::assignment("hello = 44");
 ///     let expected = Statement::Assignment(
 ///         VariableName(String::from("hello")),
-///         Expression::Number(Number { value: 44, width: None }),
+///         Expression::Number(Number { value: 44, width: NumberWidth::None }),
 ///     );
 ///     assert_eq!(parsed, IResult::Done("", expected))
 ,
@@ -86,13 +86,13 @@ named!(
 /// Parsing a mathematical expression:
 ///
 ///     use mvp_parser::parser::{self, IResult};
-///     use mvp_parser::ast::{BinaryOperator, Expression, Number};
+///     use mvp_parser::ast::{BinaryOperator, Expression, Number, NumberWidth};
 ///
 ///     let parsed = parser::expression("2 + 3");
 ///     let expected = IResult::Done("", Expression::Binary(
 ///         BinaryOperator::Add,
-///         Box::new(Expression::Number(Number { value: 2, width: None })),
-///         Box::new(Expression::Number(Number { value: 3, width: None })),
+///         Box::new(Expression::Number(Number { value: 2, width: NumberWidth::None })),
+///         Box::new(Expression::Number(Number { value: 3, width: NumberWidth::None })),
 ///     ));
 ///     assert_eq!(parsed, expected);
 ,
@@ -135,14 +135,25 @@ named!(number<&str, Expression>, map!(
         ws!(nom::digit),
         u32::from_str
     ),
-    |value| Expression::Number(Number { value: value, width: None })
+    |value| Expression::Number(Number { value: value, width: NumberWidth::None })
 ));
+
+fn hex_width_for_length(length: usize) -> NumberWidth {
+    match length {
+        2 => NumberWidth::OneByte,
+        4 => NumberWidth::TwoBytes,
+        _ => NumberWidth::None,
+    }
+}
 
 named!(hex_number<&str, Expression>, ws!(do_parse!(
     tag!("$") >>
     number: map!(
         map_res!(nom::hex_digit, |s| u32::from_str_radix(s, 16).map(|value| (s.len(), value))),
-        |(width, value)| Expression::Number(Number { value: value, width: Some(width) })
+        |(length, value)| Expression::Number(Number {
+            value: value,
+            width: hex_width_for_length(length),
+        })
     ) >>
     (number)
 )));

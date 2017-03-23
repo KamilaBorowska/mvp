@@ -1,12 +1,12 @@
 extern crate mvp_parser;
 
-use mvp_parser::ast::{BinaryOperator, Expression, Number, VariableName};
+use mvp_parser::ast::{BinaryOperator, Expression, Number, NumberWidth, VariableName};
 use mvp_parser::parser::{self, IResult};
 
 fn number(number: u32) -> Box<Expression> {
     Box::new(Expression::Number(Number {
         value: number,
-        width: None,
+        width: NumberWidth::None,
     }))
 }
 
@@ -107,7 +107,7 @@ fn complex_calls() {
         Box::new(Expression::Call(
             VariableName(String::from("f")),
             vec![
-                Expression::Number(Number { value: 1, width: None }),
+                *number(1),
                 Expression::Binary(
                     BinaryOperator::Add,
                     Box::new(Expression::Binary(
@@ -120,7 +120,7 @@ fn complex_calls() {
                     )),
                     number(9),
                 ),
-                Expression::Number(Number { value: 4, width: None }),
+                *number(4),
             ],
         )),
         number(2),
@@ -142,7 +142,7 @@ fn hex_digits() {
     let expected = IResult::Done("",
                                  Expression::Number(Number {
                                      value: 0xFE,
-                                     width: Some(2),
+                                     width: NumberWidth::OneByte,
                                  }));
     assert_eq!(result, expected);
 }
