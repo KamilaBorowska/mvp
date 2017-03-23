@@ -117,7 +117,7 @@ named!(term<&str, Expression>, do_parse!(
         pair!(alt!(
             tag!("*") => {|_| BinaryOperator::Mul}
             | tag!("/") => {|_| BinaryOperator::Div}
-        ), term),
+        ), top_expression),
         init,
         |first, (operator, another)| {
             Expression::Binary(operator, Box::new(first), Box::new(another))
