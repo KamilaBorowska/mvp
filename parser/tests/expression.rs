@@ -12,10 +12,10 @@ fn addition() {
         addition,
         Box::new(Expression::Binary(
             addition,
-            Box::new(Expression::Number(2)),
-            Box::new(Expression::Number(3)),
+            Box::new(Expression::Number { value: 2, width: None }),
+            Box::new(Expression::Number { value: 3, width: None }),
         )),
-        Box::new(Expression::Number(4)),
+        Box::new(Expression::Number { value: 4, width: None }),
     ));
     assert_eq!(result, expected);
 }
@@ -28,10 +28,10 @@ fn multiplication() {
         BinaryOperator::Div,
         Box::new(Expression::Binary(
             BinaryOperator::Mul,
-            Box::new(Expression::Number(20)),
-            Box::new(Expression::Number(30)),
+            Box::new(Expression::Number { value: 20, width: None }),
+            Box::new(Expression::Number { value: 30, width: None }),
         )),
-        Box::new(Expression::Number(40)),
+        Box::new(Expression::Number { value: 40, width: None }),
     ));
     assert_eq!(result, expected);
 }
@@ -47,20 +47,20 @@ fn precedence() {
             BinaryOperator::Sub,
             Box::new(Expression::Binary(
                 BinaryOperator::Add,
-                Box::new(Expression::Number(2)),
+                Box::new(Expression::Number { value: 2, width: None }),
                 Box::new(Expression::Binary(
                     BinaryOperator::Mul,
-                    Box::new(Expression::Number(3)),
-                    Box::new(Expression::Number(4)),
+                    Box::new(Expression::Number { value: 3, width: None }),
+                    Box::new(Expression::Number { value: 4, width: None }),
                 )),
             )),
             Box::new(Expression::Binary(
                 BinaryOperator::Div,
-                Box::new(Expression::Number(5)),
-                Box::new(Expression::Number(6)),
+                Box::new(Expression::Number { value: 5, width: None }),
+                Box::new(Expression::Number { value: 6, width: None }),
             )),
         )),
-        Box::new(Expression::Number(7)),
+        Box::new(Expression::Number { value: 7, width: None }),
     ));
     assert_eq!(result, expected);
 }
@@ -73,10 +73,10 @@ fn parens() {
         BinaryOperator::Mul,
         Box::new(Expression::Binary(
             BinaryOperator::Add,
-            Box::new(Expression::Number(2)),
-            Box::new(Expression::Number(3)),
+            Box::new(Expression::Number { value: 2, width: None }),
+            Box::new(Expression::Number { value: 3, width: None }),
         )),
-        Box::new(Expression::Number(4)),
+        Box::new(Expression::Number { value: 4, width: None }),
     ));
     assert_eq!(result, expected);
 }
@@ -94,7 +94,7 @@ fn call() {
     let result = parser::expression(input);
     let expected = IResult::Done("",
                                  Expression::Call(VariableName(String::from("sqrt")),
-                                                  vec![Expression::Number(42)]));
+                                                  vec![Expression::Number { value: 42, width: None }]));
     assert_eq!(result, expected);
 }
 
@@ -107,26 +107,26 @@ fn complex_calls() {
         Box::new(Expression::Call(
             VariableName(String::from("f")),
             vec![
-                Expression::Number(1),
+                Expression::Number { value: 1, width: None },
                 Expression::Binary(
                     BinaryOperator::Add,
                     Box::new(Expression::Binary(
                         BinaryOperator::Add,
-                        Box::new(Expression::Number(8)),
+                        Box::new(Expression::Number { value: 8, width: None }),
                         Box::new(Expression::Call(
                             VariableName(String::from("g")),
                             vec![
-                                Expression::Number(2),
-                                Expression::Number(3),
+                                Expression::Number { value: 2, width: None },
+                                Expression::Number { value: 3, width: None },
                             ],
                         )),
                     )),
-                    Box::new(Expression::Number(9)),
+                    Box::new(Expression::Number { value: 9, width: None }),
                 ),
-                Expression::Number(4),
+                Expression::Number { value: 4, width: None },
             ],
         )),
-        Box::new(Expression::Number(2)),
+        Box::new(Expression::Number { value: 2, width: None }),
     ));
     assert_eq!(result, expected);
 }
@@ -142,6 +142,6 @@ fn no_function_call_tuples() {
 fn hex_digits() {
     let input = " $ Fe ";
     let result = parser::expression(input);
-    let expected = IResult::Done("", Expression::Number(0xFE));
+    let expected = IResult::Done("", Expression::Number { value: 0xFE, width: Some(2) });
     assert_eq!(result, expected);
 }

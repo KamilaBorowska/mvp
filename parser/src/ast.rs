@@ -85,7 +85,7 @@ pub enum BinaryOperator {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Expression {
-    Number(u32),
+    Number { value: u32, width: Option<usize> },
     Variable(Label),
     Binary(BinaryOperator, Box<Expression>, Box<Expression>),
     Call(VariableName, Vec<Expression>),

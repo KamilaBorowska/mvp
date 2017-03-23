@@ -62,7 +62,7 @@ named!(
 ///     let parsed = parser::assignment("hello = 44");
 ///     let expected = Statement::Assignment(
 ///         VariableName(String::from("hello")),
-///         Expression::Number(44),
+///         Expression::Number { value: 44, width: None },
 ///     );
 ///     assert_eq!(parsed, IResult::Done("", expected))
 ,
@@ -91,8 +91,8 @@ named!(
 ///     let parsed = parser::expression("2 + 3");
 ///     let expected = IResult::Done("", Expression::Binary(
 ///         BinaryOperator::Add,
-///         Box::new(Expression::Number(2)),
-///         Box::new(Expression::Number(3)),
+///         Box::new(Expression::Number { value: 2, width: None }),
+///         Box::new(Expression::Number { value: 3, width: None }),
 ///     ));
 ///     assert_eq!(parsed, expected);
 ,
@@ -135,14 +135,14 @@ named!(number<&str, Expression>, map!(
         ws!(nom::digit),
         u32::from_str
     ),
-    Expression::Number
+    |value| Expression::Number { value: value, width: None }
 ));
 
 named!(hex_number<&str, Expression>, ws!(do_parse!(
     tag!("$") >>
     number: map!(
-        map_res!(nom::hex_digit, |s| u32::from_str_radix(s, 16)),
-        Expression::Number
+        map_res!(nom::hex_digit, |s| u32::from_str_radix(s, 16).map(|value| (s.len(), value))),
+        |(width, value)| Expression::Number { value: value, width: Some(width) }
     ) >>
     (number)
 )));
