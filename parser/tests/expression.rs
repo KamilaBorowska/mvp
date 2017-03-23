@@ -94,7 +94,10 @@ fn call() {
     let result = parser::expression(input);
     let expected = IResult::Done("",
                                  Expression::Call(VariableName(String::from("sqrt")),
-                                                  vec![Expression::Number { value: 42, width: None }]));
+                                                  vec![Expression::Number {
+                                                           value: 42,
+                                                           width: None,
+                                                       }]));
     assert_eq!(result, expected);
 }
 
@@ -142,6 +145,10 @@ fn no_function_call_tuples() {
 fn hex_digits() {
     let input = " $ Fe ";
     let result = parser::expression(input);
-    let expected = IResult::Done("", Expression::Number { value: 0xFE, width: Some(2) });
+    let expected = IResult::Done("",
+                                 Expression::Number {
+                                     value: 0xFE,
+                                     width: Some(2),
+                                 });
     assert_eq!(result, expected);
 }
