@@ -137,3 +137,11 @@ fn no_function_call_tuples() {
     let result = parser::expression(input);
     assert!(result.is_err());
 }
+
+#[test]
+fn hex_digits() {
+    let input = " $ Fe ";
+    let result = parser::expression(input);
+    let expected = IResult::Done("", Expression::Number(0xFE));
+    assert_eq!(result, expected);
+}

@@ -126,7 +126,7 @@ named!(term<&str, Expression>, do_parse!(
     (res)
 ));
 
-named!(top_expression<&str, Expression>, alt!(paren_expression | number | call));
+named!(top_expression<&str, Expression>, alt!(paren_expression | number | hex_number | call));
 
 named!(paren_expression<&str, Expression>, ws!(delimited!(tag!("("), expression, tag!(")"))));
 
@@ -137,6 +137,15 @@ named!(number<&str, Expression>, map!(
     ),
     Expression::Number
 ));
+
+named!(hex_number<&str, Expression>, ws!(do_parse!(
+    tag!("$") >>
+    number: map!(
+        map_res!(nom::hex_digit, |s| u32::from_str_radix(s, 16)),
+        Expression::Number
+    ) >>
+    (number)
+)));
 
 named!(call<&str, Expression>, ws!(do_parse!(
     identifier: identifier >>
