@@ -89,6 +89,28 @@ pub struct Number {
     pub width: NumberWidth,
 }
 
+/// A byte width of numeric literal.
+///
+/// Some numeric literals have their own suggested byte width, mostly used
+/// for purpose of determining the size of immediate instruction. 65c816 has
+/// two immediate instructions, sharing the same opcode depending on CPU
+/// mode, and using a wrong one will likely lead to a crash. The assembler
+/// doesn't try to guess the size, other than a very specific case of
+/// hexadecimal or binary literal that is exactly one or two bytes. However,
+/// because that special case does exist, it needs to be in AST.
+///
+/// For instance, the following program uses two different versions of the
+/// same opcode (A9). The distinction between those is at runtime, by checking
+/// processor flags.
+///
+/// ```asm
+/// LDA #$10   ; Interpreted as one byte literal,  A9 10
+/// LDA #$1000 ; Interpreted as two bytes literal, A9 00 10
+/// ```
+///
+/// This is useless outside of immediate instructions that work on accumulator
+/// or indexes where the number value comes directly from byte literal or
+/// variable storing such (without any operations done on it).
 #[derive(Debug, Eq, PartialEq)]
 pub enum NumberWidth {
     None,
