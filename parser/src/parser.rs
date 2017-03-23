@@ -99,14 +99,12 @@ named!(
 pub expression<&str, Expression>, do_parse!(
     init: term >>
     res: fold_many0!(
-        pair!(alt!(tag!("+") | tag!("-")), term),
+        pair!(alt!(
+            tag!("+") => {|_| BinaryOperator::Add}
+            | tag!("-") => {|_| BinaryOperator::Sub}
+        ), term),
         init,
-        |first, (op, another)| {
-            let operator = match op {
-                "+" => BinaryOperator::Add,
-                "-" => BinaryOperator::Sub,
-                _ => unreachable!(),
-            };
+        |first, (operator, another)| {
             Expression::Binary(operator, Box::new(first), Box::new(another))
         }
     ) >>
@@ -116,14 +114,12 @@ pub expression<&str, Expression>, do_parse!(
 named!(term<&str, Expression>, do_parse!(
     init: top_expression >>
     res: fold_many0!(
-        pair!(alt!(tag!("*") | tag!("/")), top_expression),
+        pair!(alt!(
+            tag!("*") => {|_| BinaryOperator::Mul}
+            | tag!("/") => {|_| BinaryOperator::Div}
+        ), term),
         init,
-        |first, (op, another)| {
-            let operator = match op {
-                "*" => BinaryOperator::Mul,
-                "/" => BinaryOperator::Div,
-                _ => unreachable!(),
-            };
+        |first, (operator, another)| {
             Expression::Binary(operator, Box::new(first), Box::new(another))
         }
     ) >>
