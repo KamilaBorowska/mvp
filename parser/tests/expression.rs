@@ -166,3 +166,15 @@ fn invalid_hex_digit_size() {
     let expected = IResult::Done("", *number(0xFED));
     assert_eq!(result, expected);
 }
+
+#[test]
+fn hex_digits_cannot_have_spaces() {
+    let input = " $ FE DC ";
+    let result = parser::expression(input);
+    assert_eq!(result,
+               IResult::Done("DC ",
+                             Expression::Number(Number {
+                                 value: 0xFE,
+                                 width: NumberWidth::OneByte,
+                             })));
+}
