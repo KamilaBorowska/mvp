@@ -146,3 +146,23 @@ fn hex_digits() {
                                  }));
     assert_eq!(result, expected);
 }
+
+#[test]
+fn two_byte_hex_digits() {
+    let input = " $ FeDc ";
+    let result = parser::expression(input);
+    let expected = IResult::Done("",
+                                 Expression::Number(Number {
+                                     value: 0xFEDC,
+                                     width: NumberWidth::TwoBytes,
+                                 }));
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn invalid_hex_digit_size() {
+    let input = " $ FeD ";
+    let result = parser::expression(input);
+    let expected = IResult::Done("", *number(0xFED));
+    assert_eq!(result, expected);
+}
