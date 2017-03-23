@@ -130,3 +130,10 @@ fn complex_calls() {
     ));
     assert_eq!(result, expected);
 }
+
+#[test]
+fn no_function_call_tuples() {
+    let input = "f((1, 2))";
+    let result = parser::expression(input);
+    assert!(result.is_err());
+}
