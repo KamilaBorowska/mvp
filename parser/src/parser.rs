@@ -52,6 +52,7 @@ pub identifier<&str, String>, do_parse!(
 named!(pub opcode<&str, Opcode>, ws!(do_parse!(
     opcode: identifier >>
     result: alt!(
+        pair!(tag!("#"), expression) => { |(_, expression)| (OpcodeMode::Immediate, expression) } |
         delimited!(tag!("("), expression, pair!(tag!(")"), not!(one_of!("+-*/")))) => { |expression|
             (OpcodeMode::Indirect, expression)
         } |

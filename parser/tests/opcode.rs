@@ -78,3 +78,19 @@ fn tricky_address_with_spaces() {
                                  });
     assert_eq!(result, expected);
 }
+
+#[test]
+fn immediate() {
+    let input = "LDA # $ 19";
+    let result = opcode(input);
+    let expected = IResult::Done("",
+                                 Opcode {
+                                     name: String::from("LDA"),
+                                     mode: OpcodeMode::Immediate,
+                                     value: Expression::Number(Number {
+                                         value: 0x19,
+                                         width: NumberWidth::OneByte,
+                                     }),
+                                 });
+    assert_eq!(result, expected);
+}
