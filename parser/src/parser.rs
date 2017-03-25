@@ -49,7 +49,11 @@ pub identifier<&str, String>, do_parse!(
     (format!("{}{}", first, res))
 ));
 
-named!(pub opcode<&str, Opcode>, ws!(do_parse!(
+named!(pub statement<&str, Statement>, alt!(
+    opcode => { |opcode| Statement::Opcode(opcode) }
+));
+
+named!(opcode<&str, Opcode>, ws!(do_parse!(
     opcode: identifier >>
     result: alt!(
         pair!(tag!("#"), expression) => { |(_, expression)| (OpcodeMode::Immediate, expression) } |
