@@ -56,3 +56,25 @@ fn tricky_address() {
                                  });
     assert_eq!(result, expected);
 }
+
+#[test]
+fn tricky_address_with_spaces() {
+    let input = "LDA ( $ 19 ) + 2 ";
+    let result = opcode(input);
+    let expected = IResult::Done("",
+                                 Opcode {
+                                     name: String::from("LDA"),
+                                     mode: OpcodeMode::Address,
+                                     value:
+                                         Expression::Binary(BinaryOperator::Add,
+                                                            Box::new(Expression::Number(Number {
+                                                                value: 0x19,
+                                                                width: NumberWidth::OneByte,
+                                                            })),
+                                                            Box::new(Expression::Number(Number {
+                                                                value: 2,
+                                                                width: NumberWidth::None,
+                                                            }))),
+                                 });
+    assert_eq!(result, expected);
+}
