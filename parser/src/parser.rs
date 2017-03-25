@@ -53,10 +53,10 @@ named!(pub statement<&str, Statement>, alt!(
     opcode => { |opcode| Statement::Opcode(opcode) }
 ));
 
-named!(opcode<&str, Opcode>, ws!(do_parse!(
+named!(opcode<&str, Opcode>, do_parse!(
     opcode: identifier >>
-    mode: opt!(pair!(tag!("."), one_of!("bBwWlL"))) >>
-    result: alt!(
+    mode: opt!(ws!(pair!(tag!("."), one_of!("bBwWlL")))) >>
+    result: ws!(alt!(
         pair!(tag!("#"), expression) => { |(_, expression)| (OpcodeMode::Immediate, expression) } |
         delimited!(tag!("("), expression, pair!(tag!(")"), not!(one_of!("+-*/")))) => { |expression|
             (OpcodeMode::Indirect, expression)
@@ -70,7 +70,7 @@ named!(opcode<&str, Opcode>, ws!(do_parse!(
                 _ => unreachable!(),
             }, expression)
         }
-    ) >>
+    )) >>
     (Opcode {
         name: opcode,
         width: mode.map(|(_, letter)| match letter {
@@ -82,7 +82,7 @@ named!(opcode<&str, Opcode>, ws!(do_parse!(
         mode: result.0,
         value: result.1,
     })
-)));
+));
 
 named!(
 /// Assignment statement parser.

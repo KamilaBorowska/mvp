@@ -145,6 +145,25 @@ fn uppercase_opcode_width() {
 }
 
 #[test]
+fn opcode_width_with_spaces() {
+    let input = "LDA . w #$19";
+    let result = statement(input);
+    let expected =
+        IResult::Done("",
+                      Statement::Opcode(Opcode {
+                                            name: String::from("LDA"),
+                                            width: Some(2),
+                                            mode: OpcodeMode::Immediate,
+                                            value: Expression::Number(Number {
+                                                                          value: 0x19,
+                                                                          width:
+                                                                              NumberWidth::OneByte,
+                                                                      }),
+                                        }));
+    assert_eq!(result, expected);
+}
+
+#[test]
 fn x_address() {
     let input = "LDA $19,x";
     let result = statement(input);
