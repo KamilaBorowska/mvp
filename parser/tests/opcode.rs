@@ -200,3 +200,22 @@ fn y_address() {
                                         }));
     assert_eq!(result, expected);
 }
+
+#[test]
+fn stack_address() {
+    let input = " LDA $   19    ,    s  ";
+    let result = statement(input);
+    let expected =
+        IResult::Done("",
+                      Statement::Opcode(Opcode {
+                                            name: String::from("LDA"),
+                                            width: None,
+                                            mode: OpcodeMode::StackAddress,
+                                            value: Expression::Number(Number {
+                                                                          value: 0x19,
+                                                                          width:
+                                                                              NumberWidth::OneByte,
+                                                                      }),
+                                        }));
+    assert_eq!(result, expected);
+}

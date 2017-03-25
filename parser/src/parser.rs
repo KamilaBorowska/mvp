@@ -49,9 +49,9 @@ pub identifier<&str, String>, do_parse!(
     (format!("{}{}", first, res))
 ));
 
-named!(pub statement<&str, Statement>, alt!(
+named!(pub statement<&str, Statement>, ws!(alt!(
     opcode => { |opcode| Statement::Opcode(opcode) }
-));
+)));
 
 named!(opcode<&str, Opcode>, do_parse!(
     opcode: identifier >>
