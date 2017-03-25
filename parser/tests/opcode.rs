@@ -162,3 +162,22 @@ fn x_address() {
                                         }));
     assert_eq!(result, expected);
 }
+
+#[test]
+fn y_address() {
+    let input = "LDA $ 19 , y ";
+    let result = statement(input);
+    let expected =
+        IResult::Done("",
+                      Statement::Opcode(Opcode {
+                                            name: String::from("LDA"),
+                                            width: None,
+                                            mode: OpcodeMode::YAddress,
+                                            value: Expression::Number(Number {
+                                                                          value: 0x19,
+                                                                          width:
+                                                                              NumberWidth::OneByte,
+                                                                      }),
+                                        }));
+    assert_eq!(result, expected);
+}
