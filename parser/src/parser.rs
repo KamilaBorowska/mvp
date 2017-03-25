@@ -61,7 +61,15 @@ named!(opcode<&str, Opcode>, ws!(do_parse!(
         delimited!(tag!("("), expression, pair!(tag!(")"), not!(one_of!("+-*/")))) => { |expression|
             (OpcodeMode::Indirect, expression)
         } |
-        expression => { |expression| (OpcodeMode::Address, expression) }
+        pair!(expression, opt!(pair!(tag!(","), one_of!("xys")))) => { |(expression, mode)|
+            (match mode {
+                None => OpcodeMode::Address,
+                Some((_, 'x')) => OpcodeMode::XAddress,
+                Some((_, 'y')) => OpcodeMode::YAddress,
+                Some((_, 's')) => OpcodeMode::StackAddress,
+                _ => unreachable!(),
+            }, expression)
+        }
     ) >>
     (Opcode {
         name: opcode,

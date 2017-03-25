@@ -5,9 +5,9 @@ use mvp_parser::parser::{self, IResult};
 
 fn number(number: u32) -> Box<Expression> {
     Box::new(Expression::Number(Number {
-        value: number,
-        width: NumberWidth::None,
-    }))
+                                    value: number,
+                                    width: NumberWidth::None,
+                                }))
 }
 
 #[test]
@@ -102,11 +102,11 @@ fn call() {
 fn complex_calls() {
     let input = "f(1, 8 + g(2, 3) + 9, 4) * 2";
     let result = parser::expression(input);
-    let expected = IResult::Done("", Expression::Binary(
-        BinaryOperator::Mul,
-        Box::new(Expression::Call(
-            VariableName(String::from("f")),
-            vec![
+    let expected =
+        IResult::Done("",
+                      Expression::Binary(BinaryOperator::Mul,
+                                         Box::new(Expression::Call(VariableName(String::from("f")),
+                                                                   vec![
                 *number(1),
                 Expression::Binary(
                     BinaryOperator::Add,
@@ -121,10 +121,8 @@ fn complex_calls() {
                     number(9),
                 ),
                 *number(4),
-            ],
-        )),
-        number(2),
-    ));
+            ])),
+                                         number(2)));
     assert_eq!(result, expected);
 }
 
@@ -141,9 +139,9 @@ fn hex_digits() {
     let result = parser::expression(input);
     let expected = IResult::Done("",
                                  Expression::Number(Number {
-                                     value: 0xFE,
-                                     width: NumberWidth::OneByte,
-                                 }));
+                                                        value: 0xFE,
+                                                        width: NumberWidth::OneByte,
+                                                    }));
     assert_eq!(result, expected);
 }
 
@@ -153,9 +151,9 @@ fn two_byte_hex_digits() {
     let result = parser::expression(input);
     let expected = IResult::Done("",
                                  Expression::Number(Number {
-                                     value: 0xFEDC,
-                                     width: NumberWidth::TwoBytes,
-                                 }));
+                                                        value: 0xFEDC,
+                                                        width: NumberWidth::TwoBytes,
+                                                    }));
     assert_eq!(result, expected);
 }
 
@@ -174,7 +172,7 @@ fn hex_digits_cannot_have_spaces() {
     assert_eq!(result,
                IResult::Done("DC ",
                              Expression::Number(Number {
-                                 value: 0xFE,
-                                 width: NumberWidth::OneByte,
-                             })));
+                                                    value: 0xFE,
+                                                    width: NumberWidth::OneByte,
+                                                })));
 }
