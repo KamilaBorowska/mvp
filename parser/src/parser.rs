@@ -55,9 +55,7 @@ named!(pub opcode<&str, Opcode>, ws!(do_parse!(
         delimited!(tag!("("), expression, pair!(tag!(")"), not!(one_of!("+-*/")))) => { |expression|
             (OpcodeMode::Indirect, expression)
         } |
-        tap!(expression: expression => {
-            println!("{:?}", expression);
-        }) => { |expression| (OpcodeMode::Address, expression) }
+        expression => { |expression| (OpcodeMode::Address, expression) }
     ) >>
     (Opcode {
         name: opcode,
