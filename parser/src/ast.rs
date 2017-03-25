@@ -7,8 +7,6 @@ pub enum Statement {
     Label(Label),
     /// Processor operation.
     Opcode(Opcode),
-    /// Assembly keyword.
-    Keyword(Keyword),
     /// Group of if blocks, possibly with else if conditions.
     If(Vec<Condition>),
     /// Assignment of `Expression` to `VariableName`.
@@ -57,13 +55,6 @@ pub enum OpcodeMode {
     LongIndirect, // [$]
     LongIndirectY, // [$],y
     Move { first_bank: Expression }, // $,$
-}
-
-/// Assembler keyword.
-#[derive(Debug, Eq, PartialEq)]
-pub enum Keyword {
-    /// A keyword that changes the position the code is written to.
-    Org(Expression),
 }
 
 /// A single "if" block with predicate and statements.
