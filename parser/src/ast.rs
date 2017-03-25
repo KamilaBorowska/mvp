@@ -56,6 +56,7 @@ pub enum OpcodeMode {
     LongIndirect, // [$]
     LongIndirectY, // [$],y
     Move { first_bank: Expression }, // $,$
+    Accumulator, // A
 }
 
 /// A single "if" block with predicate and statements.
