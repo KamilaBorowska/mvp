@@ -11,6 +11,7 @@ fn address() {
     let expected = IResult::Done("",
                                  Statement::Opcode(Opcode {
                                      name: String::from("LDA"),
+                                     width: None,
                                      mode: OpcodeMode::Address,
                                      value: Expression::Number(Number {
                                          value: 0x19,
@@ -27,6 +28,7 @@ fn indirect() {
     let expected = IResult::Done("",
                                  Statement::Opcode(Opcode {
                                      name: String::from("LDA"),
+                                     width: None,
                                      mode: OpcodeMode::Indirect,
                                      value: Expression::Number(Number {
                                          value: 0x19,
@@ -43,6 +45,7 @@ fn tricky_address() {
     let expected = IResult::Done("",
                                  Statement::Opcode(Opcode {
                                      name: String::from("LDA"),
+                                     width: None,
                                      mode: OpcodeMode::Address,
                                      value:
                                          Expression::Binary(BinaryOperator::Add,
@@ -65,6 +68,7 @@ fn tricky_address_with_spaces() {
     let expected = IResult::Done("",
                                  Statement::Opcode(Opcode {
                                      name: String::from("LDA"),
+                                     width: None,
                                      mode: OpcodeMode::Address,
                                      value:
                                          Expression::Binary(BinaryOperator::Add,
@@ -87,6 +91,24 @@ fn immediate() {
     let expected = IResult::Done("",
                                  Statement::Opcode(Opcode {
                                      name: String::from("LDA"),
+                                     width: None,
+                                     mode: OpcodeMode::Immediate,
+                                     value: Expression::Number(Number {
+                                         value: 0x19,
+                                         width: NumberWidth::OneByte,
+                                     }),
+                                 }));
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn opcode_width() {
+    let input = "LDA.w # ( $ 19 )";
+    let result = statement(input);
+    let expected = IResult::Done("",
+                                 Statement::Opcode(Opcode {
+                                     name: String::from("LDA"),
+                                     width: Some(2),
                                      mode: OpcodeMode::Immediate,
                                      value: Expression::Number(Number {
                                          value: 0x19,

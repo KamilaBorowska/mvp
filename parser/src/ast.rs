@@ -36,6 +36,7 @@ pub enum Label {
 #[derive(Debug, Eq, PartialEq)]
 pub struct Opcode {
     pub name: String,
+    pub width: Option<u32>,
     pub mode: OpcodeMode,
     pub value: Expression,
 }
