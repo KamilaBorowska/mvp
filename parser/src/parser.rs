@@ -82,7 +82,7 @@ named!(
 ///         VariableName(String::from("hello")),
 ///         Expression::Number(Number { value: 44, width: NumberWidth::None }),
 ///     );
-///     assert_eq!(parsed, IResult::Done("", expected))
+///     assert_eq!(parsed, IResult::Done("", expected));
 ,
 pub assignment<&str, Statement>, ws!(do_parse!(
     name: identifier >>
