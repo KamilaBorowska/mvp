@@ -117,3 +117,20 @@ fn opcode_width() {
                                  }));
     assert_eq!(result, expected);
 }
+
+#[test]
+fn uppercase_opcode_width() {
+    let input = "LDA.W # ($ 19)";
+    let result = statement(input);
+    let expected = IResult::Done("",
+                                 Statement::Opcode(Opcode {
+                                     name: String::from("LDA"),
+                                     width: Some(2),
+                                     mode: OpcodeMode::Immediate,
+                                     value: Expression::Number(Number {
+                                         value: 0x19,
+                                         width: NumberWidth::OneByte,
+                                     }),
+                                 }));
+    assert_eq!(result, expected);
+}

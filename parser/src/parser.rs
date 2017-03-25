@@ -55,7 +55,7 @@ named!(pub statement<&str, Statement>, alt!(
 
 named!(opcode<&str, Opcode>, ws!(do_parse!(
     opcode: identifier >>
-    mode: opt!(pair!(tag!("."), one_of!("bwl"))) >>
+    mode: opt!(pair!(tag!("."), one_of!("bBwWlL"))) >>
     result: alt!(
         pair!(tag!("#"), expression) => { |(_, expression)| (OpcodeMode::Immediate, expression) } |
         delimited!(tag!("("), expression, pair!(tag!(")"), not!(one_of!("+-*/")))) => { |expression|
@@ -66,9 +66,9 @@ named!(opcode<&str, Opcode>, ws!(do_parse!(
     (Opcode {
         name: opcode,
         width: mode.map(|(_, letter)| match letter {
-            'b' => 1,
-            'w' => 2,
-            'l' => 3,
+            'b'|'B' => 1,
+            'w'|'W' => 2,
+            'l'|'L' => 3,
             _ => unreachable!(),
         }),
         mode: result.0,
