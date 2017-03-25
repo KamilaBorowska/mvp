@@ -24,9 +24,17 @@ test!(single_exclamation, "!");
 test!(exclamation_only_at_beginning, "!!", "!", "!");
 test!(underscore, "a___b");
 test!(underscore_at_beginning, "_private");
+test!(unicode, "世界");
+test!(unicode_continue, "a﹏b");
 
 #[test]
 fn parse_failure() {
     let parsed = parser::identifier("4");
+    assert!(parsed.is_err());
+}
+
+#[test]
+fn unicode_continue_cannot_be_at_beginning() {
+    let parsed = parser::identifier("﹏");
     assert!(parsed.is_err());
 }
