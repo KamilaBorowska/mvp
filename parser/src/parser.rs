@@ -6,7 +6,8 @@
 //! text left to parse, and second is retrieved AST value.
 //! `IResult::Error` means that parse did fail.
 
-use ast::{BinaryOperator, Expression, Number, NumberWidth, Statement, VariableName};
+use ast::{BinaryOperator, Expression, Number, NumberWidth, Opcode, OpcodeMode, Statement,
+          VariableName};
 
 use std::str::{self, FromStr};
 
@@ -47,6 +48,23 @@ pub identifier<&str, String>, do_parse!(
     res: take_while_s!(valid_later_character) >>
     (format!("{}{}", first, res))
 ));
+
+named!(pub opcode<&str, Opcode>, ws!(do_parse!(
+    opcode: identifier >>
+    result: alt!(
+        delimited!(tag!("("), expression, pair!(tag!(")"), not!(one_of!("+-*/")))) => { |expression|
+            (OpcodeMode::Indirect, expression)
+        } |
+        tap!(expression: expression => {
+            println!("{:?}", expression);
+        }) => { |expression| (OpcodeMode::Address, expression) }
+    ) >>
+    (Opcode {
+        name: opcode,
+        mode: result.0,
+        value: result.1,
+    })
+)));
 
 named!(
 /// Assignment statement parser.

@@ -36,8 +36,27 @@ pub enum Label {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum Opcode {
+pub struct Opcode {
+    pub name: String,
+    pub mode: OpcodeMode,
+    pub value: Expression,
+}
 
+#[derive(Debug, Eq, PartialEq)]
+pub enum OpcodeMode {
+    Implied, // no argument
+    Immediate, // #$
+    Address, // $
+    XAddress, // $,x
+    YAddress, // $,y
+    StackAddress, // $,s
+    Indirect, // ($)
+    XIndirect, // ($,x)
+    IndirectY, // ($),y
+    StackIndirectY, // ($,s),y
+    LongIndirect, // [$]
+    LongIndirectY, // [$],y
+    Move { first_bank: Expression }, // $,$
 }
 
 /// Assembler keyword.
