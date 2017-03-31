@@ -18,7 +18,7 @@ pub enum Statement {
 /// Most of time, a `Label` is used when a reference to a value is needed,
 /// however variable names are in grammar to support those cases where
 /// a relative label reference is not acceptable, in particular assignments.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct VariableName(pub String);
 
 /// A reference to a location in assembly.
@@ -27,7 +27,7 @@ pub struct VariableName(pub String);
 /// whose level of depth is determined by a number, negative integers
 /// mean backward references, while positive numbers mean forward
 /// references.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Label {
     Named(VariableName),
     Relative(i32),
@@ -95,7 +95,7 @@ pub enum BinaryOperator {
     Or,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Number {
     pub value: u32,
     pub width: NumberWidth,
@@ -123,7 +123,7 @@ pub struct Number {
 /// This is useless outside of immediate instructions that work on accumulator
 /// or indexes where the number value comes directly from byte literal or
 /// variable storing such (without any operations done on it).
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum NumberWidth {
     None,
     OneByte,
@@ -134,6 +134,22 @@ pub enum NumberWidth {
 pub enum Expression {
     Number(Number),
     Variable(Label),
-    Binary(BinaryOperator, Box<Expression>, Box<Expression>),
+    Binary(BinaryOperator, Box<[Expression; 2]>),
     Call(VariableName, Vec<Expression>),
+}
+
+// Workaround for a bug in Rust, derive when fixed
+impl Clone for Expression {
+    fn clone(&self) -> Expression {
+        use self::Expression::*;
+        match *self {
+            Number(ref number) => Number(number.clone()),
+            Variable(ref label) => Variable(label.clone()),
+            Binary(op, ref expressions) => {
+                Binary(op,
+                       Box::new([expressions[0].clone(), expressions[1].clone()]))
+            }
+            Call(ref name, ref expressions) => Call(name.clone(), expressions.clone()),
+        }
+    }
 }

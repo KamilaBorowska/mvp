@@ -45,22 +45,24 @@ fn indirect() {
 fn tricky_address() {
     let input = "LDA ($19)+2 :";
     let result = statement(input);
-    let expected = IResult::Done(":",
-                                 Statement::Opcode(Opcode {
-                                     name: String::from("LDA"),
-                                     width: None,
-                                     mode: OpcodeMode::Address,
-                                     value:
-                                         Expression::Binary(BinaryOperator::Add,
-                                                            Box::new(Expression::Number(Number {
-                                                                value: 0x19,
-                                                                width: NumberWidth::OneByte,
-                                                            })),
-                                                            Box::new(Expression::Number(Number {
-                                                                value: 2,
-                                                                width: NumberWidth::None,
-                                                            }))),
-                                 }));
+    let expected = IResult::Done(":", Statement::Opcode(Opcode {
+        name: String::from("LDA"),
+        width: None,
+        mode: OpcodeMode::Address,
+        value: Expression::Binary(
+            BinaryOperator::Add,
+            Box::new([
+                Expression::Number(Number {
+                    value: 0x19,
+                    width: NumberWidth::OneByte,
+                }),
+                Expression::Number(Number {
+                value: 2,
+                    width: NumberWidth::None,
+                }),
+            ]),
+        ),
+    }));
     assert_eq!(result, expected);
 }
 
@@ -68,22 +70,24 @@ fn tricky_address() {
 fn tricky_address_with_spaces() {
     let input = "LDA ( $ 19 ) + 2 :";
     let result = statement(input);
-    let expected = IResult::Done(":",
-                                 Statement::Opcode(Opcode {
-                                     name: String::from("LDA"),
-                                     width: None,
-                                     mode: OpcodeMode::Address,
-                                     value:
-                                         Expression::Binary(BinaryOperator::Add,
-                                                            Box::new(Expression::Number(Number {
-                                                                value: 0x19,
-                                                                width: NumberWidth::OneByte,
-                                                            })),
-                                                            Box::new(Expression::Number(Number {
-                                                                value: 2,
-                                                                width: NumberWidth::None,
-                                                            }))),
-                                 }));
+    let expected = IResult::Done(":", Statement::Opcode(Opcode {
+        name: String::from("LDA"),
+        width: None,
+        mode: OpcodeMode::Address,
+        value: Expression::Binary(
+            BinaryOperator::Add,
+            Box::new([
+                Expression::Number(Number {
+                    value: 0x19,
+                    width: NumberWidth::OneByte,
+                }),
+                Expression::Number(Number {
+                value: 2,
+                    width: NumberWidth::None,
+                }),
+            ]),
+        ),
+    }));
     assert_eq!(result, expected);
 }
 

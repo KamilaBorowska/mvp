@@ -127,8 +127,10 @@ named!(
 ///     let parsed = parser::expression("2 + 3");
 ///     let expected = IResult::Done("", Expression::Binary(
 ///         BinaryOperator::Add,
-///         Box::new(Expression::Number(Number { value: 2, width: NumberWidth::None })),
-///         Box::new(Expression::Number(Number { value: 3, width: NumberWidth::None })),
+///         Box::new([
+///             Expression::Number(Number { value: 2, width: NumberWidth::None }),
+///             Expression::Number(Number { value: 3, width: NumberWidth::None }),
+///         ]),
 ///     ));
 ///     assert_eq!(parsed, expected);
 ,
@@ -141,7 +143,7 @@ pub expression<&str, Expression>, do_parse!(
         ), term),
         init,
         |first, (operator, another)| {
-            Expression::Binary(operator, Box::new(first), Box::new(another))
+            Expression::Binary(operator, Box::new([first, another]))
         }
     ) >>
     (res)
@@ -156,7 +158,7 @@ named!(term<&str, Expression>, do_parse!(
         ), top_expression),
         init,
         |first, (operator, another)| {
-            Expression::Binary(operator, Box::new(first), Box::new(another))
+            Expression::Binary(operator, Box::new([first, another]))
         }
     ) >>
     (res)
