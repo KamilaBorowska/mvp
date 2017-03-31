@@ -1,5 +1,3 @@
-#![feature(trace_macros)]
-
 extern crate mvp_parser;
 
 use mvp_parser::ast::{BinaryOperator, Expression, Number, NumberWidth, VariableName};
