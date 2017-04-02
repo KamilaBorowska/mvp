@@ -246,4 +246,3 @@ fn stack_address() {
                                         }));
     assert_eq!(result, expected);
 }
-

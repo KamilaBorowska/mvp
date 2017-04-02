@@ -54,38 +54,27 @@ macro_rules! tree {
     };
 }
 
-#[test]
-fn addition() {
-    let input = "2 + 3 + 4";
-    let result = parser::expression(input);
-    let expected = IResult::Done("", tree!(+ (+ 2 3) 4));
-    assert_eq!(result, expected);
+macro_rules! test {
+    ($name:ident: $input:expr => tree:$token:tt) => {
+        #[test]
+        fn $name() {
+            let input = $input;
+            let result = parser::expression(input);
+            let expected = IResult::Done("", tree!($tree));
+            assert_eq!(result, expected);
+        }
+    };
 }
 
-
-#[test]
-fn multiplication() {
-    let input = "20 * 30 / 40";
-    let result = parser::expression(input);
-    let expected = IResult::Done("", tree!(/ (* 20 30) 40));
-    assert_eq!(result, expected);
-}
-
-#[test]
-fn precedence() {
-    let input = "2 + 3 * 4 - 5 / 6 + 7";
-    let result = parser::expression(input);
-    let expected = IResult::Done("", tree!(+ (- (+ 2 (* 3 4)) (/ 5 6)) 7));
-    assert_eq!(result, expected);
-}
-
-#[test]
-fn parens() {
-    let input = " ( 2 + 3 ) * 4 ";
-    let result = parser::expression(input);
-    let expected = IResult::Done("", tree!(* (+ 2 3) 4));
-    assert_eq!(result, expected);
-}
+test!(addition: "2 + 3 + 4" => (+ (+ 2 3) 4));
+test!(multiplication: "20 * 30 / 40" => (/ (* 20 30) 40));
+test!(precedence: "2 + 3 * 4 - 5 / 6 + 7" => (+ (- (+ 2 (* 3 4)) (/ 5 6)) 7));
+test!(parens: " ( 2 + 3 ) * 4 " => (* (+ 2 3) 4));
+test!(call: " sqrt ( 42 ) " => (sqrt 42));
+test!(complex_calls: "f(1, 8 + g(2, 3) + 9, 4) * 2" => (* (f 1 (+ (+ 8 (g 2 3)) 9) 4) 2));
+test!(hex_digits: " $ Fe " => (one 0xFE));
+test!(two_byte_hex_digits: " $ FeDc " => (two 0xFEDC));
+test!(invalid_hex_digit_size: " $ FeD " => (0xFED));
 
 #[test]
 fn reject_huge_numbers() {
@@ -95,50 +84,10 @@ fn reject_huge_numbers() {
 }
 
 #[test]
-fn call() {
-    let input = " sqrt ( 42 ) ";
-    let result = parser::expression(input);
-    let expected = IResult::Done("", tree!(sqrt 42));
-    assert_eq!(result, expected);
-}
-
-#[test]
-fn complex_calls() {
-    let input = "f(1, 8 + g(2, 3) + 9, 4) * 2";
-    let result = parser::expression(input);
-    let expected = IResult::Done("", tree!(* (f 1 (+ (+ 8 (g 2 3)) 9) 4) 2));
-    assert_eq!(result, expected);
-}
-
-#[test]
 fn no_function_call_tuples() {
     let input = "f((1, 2))";
     let result = parser::expression(input);
     assert!(result.is_err());
-}
-
-#[test]
-fn hex_digits() {
-    let input = " $ Fe ";
-    let result = parser::expression(input);
-    let expected = IResult::Done("", tree!(one 0xFE));
-    assert_eq!(result, expected);
-}
-
-#[test]
-fn two_byte_hex_digits() {
-    let input = " $ FeDc ";
-    let result = parser::expression(input);
-    let expected = IResult::Done("", tree!(two 0xFEDC));
-    assert_eq!(result, expected);
-}
-
-#[test]
-fn invalid_hex_digit_size() {
-    let input = " $ FeD ";
-    let result = parser::expression(input);
-    let expected = IResult::Done("", tree!(0xFED));
-    assert_eq!(result, expected);
 }
 
 #[test]
