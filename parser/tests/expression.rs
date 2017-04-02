@@ -55,12 +55,12 @@ macro_rules! tree {
 }
 
 macro_rules! test {
-    ($name:ident: $input:expr => tree:$token:tt) => {
+    ($name:ident: $input:expr => $token:tt) => {
         #[test]
         fn $name() {
             let input = $input;
             let result = parser::expression(input);
-            let expected = IResult::Done("", tree!($tree));
+            let expected = IResult::Done("", tree!($token));
             assert_eq!(result, expected);
         }
     };
@@ -74,7 +74,7 @@ test!(call: " sqrt ( 42 ) " => (sqrt 42));
 test!(complex_calls: "f(1, 8 + g(2, 3) + 9, 4) * 2" => (* (f 1 (+ (+ 8 (g 2 3)) 9) 4) 2));
 test!(hex_digits: " $ Fe " => (one 0xFE));
 test!(two_byte_hex_digits: " $ FeDc " => (two 0xFEDC));
-test!(invalid_hex_digit_size: " $ FeD " => (0xFED));
+test!(invalid_hex_digit_size: " $ FeD " => 0xFED);
 
 #[test]
 fn reject_huge_numbers() {
