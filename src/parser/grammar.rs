@@ -73,7 +73,7 @@ named!(x_indirect<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
     tag!("(") >>
     expression: expression >>
     tag!(",") >>
-    tag!("x") >>
+    one_of!("xX") >>
     tag!(")") >>
     (expression, OpcodeMode::XIndirect)
 )));
@@ -81,12 +81,12 @@ named!(x_indirect<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
 named!(address<&str, (Expression, OpcodeMode)>, pair!(expression, address_mode));
 
 named!(address_mode<&str, OpcodeMode>, map!(
-    opt!(ws!(pair!(tag!(","), one_of!("xys")))),
+    opt!(ws!(pair!(tag!(","), one_of!("xysXYS")))),
     |result| match result {
         None => OpcodeMode::Address,
-        Some((_, 'x')) => OpcodeMode::XAddress,
-        Some((_, 'y')) => OpcodeMode::YAddress,
-        Some((_, 's')) => OpcodeMode::StackAddress,
+        Some((_, 'x')) | Some((_, 'X')) => OpcodeMode::XAddress,
+        Some((_, 'y')) | Some((_, 'Y')) => OpcodeMode::YAddress,
+        Some((_, 's')) | Some((_, 'S')) => OpcodeMode::StackAddress,
         _ => unreachable!(),
     }
 ));
