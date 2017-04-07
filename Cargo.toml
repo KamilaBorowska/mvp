@@ -4,5 +4,5 @@ version = "0.1.0"
 authors = ["Konrad Borowski <xfix@protonmail.com>"]
 
 [dependencies]
-[dependencies.mvp-parser]
-path = "parser"
+nom = "2.2.0"
+unicode-xid = "0.0.4"

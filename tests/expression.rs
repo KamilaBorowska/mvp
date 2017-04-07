@@ -1,7 +1,7 @@
-extern crate mvp_parser;
+extern crate mvp;
 
-use mvp_parser::ast::{BinaryOperator, Expression, Number, NumberWidth, VariableName};
-use mvp_parser::parser::{self, IResult};
+use mvp::parser::ast::{BinaryOperator, Expression, Number, NumberWidth, VariableName};
+use mvp::parser::grammar::{self, IResult};
 
 macro_rules! binary_op {
     (+) => { BinaryOperator::Add };
@@ -59,7 +59,7 @@ macro_rules! test {
         #[test]
         fn $name() {
             let input = $input;
-            let result = parser::expression(input);
+            let result = grammar::expression(input);
             let expected = IResult::Done("", tree!($token));
             assert_eq!(result, expected);
         }
@@ -79,20 +79,20 @@ test!(invalid_hex_digit_size: " $ FeD " => 0xFED);
 #[test]
 fn reject_huge_numbers() {
     let input = "2859421875392683928732568";
-    let result = parser::expression(input);
+    let result = grammar::expression(input);
     assert!(result.is_err());
 }
 
 #[test]
 fn no_function_call_tuples() {
     let input = "f((1, 2))";
-    let result = parser::expression(input);
+    let result = grammar::expression(input);
     assert!(result.is_err());
 }
 
 #[test]
 fn hex_digits_cannot_have_spaces() {
     let input = " $ FE DC ";
-    let result = parser::expression(input);
+    let result = grammar::expression(input);
     assert_eq!(result, IResult::Done("DC ", tree!(one 0xFE)));
 }

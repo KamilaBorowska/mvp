@@ -1,8 +1,8 @@
-extern crate mvp_parser;
+extern crate mvp;
 
-use mvp_parser::ast::{BinaryOperator, Expression, Number, NumberWidth, Opcode, OpcodeMode,
+use mvp::parser::ast::{BinaryOperator, Expression, Number, NumberWidth, Opcode, OpcodeMode,
                       Statement};
-use mvp_parser::parser::{statement, IResult};
+use mvp::parser::grammar::{statement, IResult};
 
 #[test]
 fn address() {

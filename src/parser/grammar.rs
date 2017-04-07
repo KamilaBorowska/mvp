@@ -6,8 +6,8 @@
 //! text left to parse, and second is retrieved AST value.
 //! `IResult::Error` means that parse did fail.
 
-use ast::{BinaryOperator, Expression, Number, NumberWidth, Opcode, OpcodeMode, Statement,
-          VariableName};
+use parser::ast::{BinaryOperator, Expression, Number, NumberWidth, Opcode, OpcodeMode, Statement,
+                  VariableName};
 
 use std::str::{self, FromStr};
 
@@ -38,9 +38,9 @@ named!(
 ///
 /// Parsing an Unicode identifier.
 ///
-///     use mvp_parser::parser::{self, IResult};
+///     use mvp::parser::grammar::{self, IResult};
 ///
-///     let parsed = parser::identifier("世界");
+///     let parsed = grammar::identifier("世界");
 ///     assert_eq!(parsed, IResult::Done("", String::from("世界")));
 ,
 pub identifier<&str, String>, do_parse!(
@@ -92,10 +92,10 @@ named!(
 ///
 /// # Examples
 ///
-///     use mvp_parser::parser::{self, IResult};
-///     use mvp_parser::ast::{Expression, Number, NumberWidth, Statement, VariableName};
+///     use mvp::parser::grammar::{self, IResult};
+///     use mvp::parser::ast::{Expression, Number, NumberWidth, Statement, VariableName};
 ///
-///     let parsed = parser::assignment("hello = 44");
+///     let parsed = grammar::assignment("hello = 44");
 ///     let expected = Statement::Assignment(
 ///         VariableName(String::from("hello")),
 ///         Expression::Number(Number { value: 44, width: NumberWidth::None }),
@@ -121,10 +121,10 @@ named!(
 ///
 /// Parsing a mathematical expression:
 ///
-///     use mvp_parser::parser::{self, IResult};
-///     use mvp_parser::ast::{BinaryOperator, Expression, Number, NumberWidth};
+///     use mvp::parser::grammar::{self, IResult};
+///     use mvp::parser::ast::{BinaryOperator, Expression, Number, NumberWidth};
 ///
-///     let parsed = parser::expression("2 + 3");
+///     let parsed = grammar::expression("2 + 3");
 ///     let expected = IResult::Done("", Expression::Binary(
 ///         BinaryOperator::Add,
 ///         Box::new([
@@ -205,3 +205,4 @@ named!(call<&str, Expression>, ws!(do_parse!(
     ) >>
     (Expression::Call(VariableName(identifier), parts))
 )));
+

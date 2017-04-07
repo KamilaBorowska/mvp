@@ -1,6 +1,0 @@
-#!/bin/sh
-
-EXIT_STATUS=0
-(cd parser && cargo test) || EXIT_STATUS=$?
-(cd src && cargo test) || EXIT_STATUS=$?
-exit $EXIT_STATUS

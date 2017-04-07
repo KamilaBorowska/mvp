@@ -1,6 +1,6 @@
-extern crate mvp_parser;
+extern crate mvp;
 
-use mvp_parser::parser::{self, IResult};
+use mvp::parser::grammar::{self, IResult};
 
 macro_rules! test {
     ($name:ident, $input:expr) => {
@@ -10,7 +10,7 @@ macro_rules! test {
     ($name:ident, $input:expr, $unparsed:expr, $output:expr) => {
         #[test]
         fn $name() {
-            let parsed = parser::identifier($input);
+            let parsed = grammar::identifier($input);
             assert_eq!(parsed, IResult::Done($unparsed, String::from($output)))
         }
     };
@@ -29,12 +29,12 @@ test!(unicode_continue, "a﹏b");
 
 #[test]
 fn parse_failure() {
-    let parsed = parser::identifier("4");
+    let parsed = grammar::identifier("4");
     assert!(parsed.is_err());
 }
 
 #[test]
 fn unicode_continue_cannot_be_at_beginning() {
-    let parsed = parser::identifier("﹏");
+    let parsed = grammar::identifier("﹏");
     assert!(parsed.is_err());
 }
