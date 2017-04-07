@@ -53,6 +53,31 @@ named!(pub statement<&str, Statement>, ws!(alt!(
     opcode => { |opcode| Statement::Opcode(opcode) }
 )));
 
+named!(immediate<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+    tag!("#") >>
+    expression: expression >>
+    (expression, OpcodeMode::Immediate)
+)));
+
+named!(indirect<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+    tag!("(") >>
+    expression: expression >>
+    tag!(")") >>
+    not!(one_of!("+-*/")) >>
+    (expression, OpcodeMode::Indirect)
+)));
+
+named!(x_indirect<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+    tag!("(") >>
+    expression: expression >>
+    tag!(",") >>
+    tag!("x") >>
+    tag!(")") >>
+    (expression, OpcodeMode::XIndirect)
+)));
+
+named!(address<&str, (Expression, OpcodeMode)>, pair!(expression, address_mode));
+
 named!(address_mode<&str, OpcodeMode>, map!(
     opt!(ws!(pair!(tag!(","), one_of!("xys")))),
     |result| match result {
@@ -67,21 +92,7 @@ named!(address_mode<&str, OpcodeMode>, map!(
 named!(opcode<&str, Opcode>, do_parse!(
     opcode: identifier >>
     mode: opt!(ws!(pair!(tag!("."), one_of!("bBwWlL")))) >>
-    result: ws!(alt!(
-        pair!(tag!("#"), expression) => { |(_, expression)| (expression, OpcodeMode::Immediate) } |
-        delimited!(tag!("("), expression, pair!(tag!(")"), not!(one_of!("+-*/")))) => { |result|
-            (result, OpcodeMode::Indirect)
-        } |
-        do_parse!(
-            tag!("(") >>
-            expression: expression >>
-            tag!(",") >>
-            tag!("x") >>
-            tag!(")") >>
-            (expression, OpcodeMode::XIndirect)
-        ) |
-        pair!(expression, address_mode)
-    )) >>
+    result: alt!(immediate | indirect | x_indirect | address) >>
     (Opcode {
         name: opcode,
         width: mode.map(|(_, letter)| match letter {
