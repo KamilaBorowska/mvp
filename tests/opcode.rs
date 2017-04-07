@@ -1,7 +1,7 @@
 extern crate mvp;
 
 use mvp::parser::ast::{BinaryOperator, Expression, Number, NumberWidth, Opcode, OpcodeMode,
-                      Statement};
+                       Statement};
 use mvp::parser::grammar::{statement, IResult};
 
 #[test]
