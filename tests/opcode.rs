@@ -246,3 +246,22 @@ fn stack_address() {
                                         }));
     assert_eq!(result, expected);
 }
+
+#[test]
+fn x_indirect() {
+    let input = "LDA ( $19 , x ) ";
+    let result = statement(input);
+    let expected =
+        IResult::Done("",
+                      Statement::Opcode(Opcode {
+                                            name: String::from("LDA"),
+                                            width: None,
+                                            mode: OpcodeMode::XIndirect,
+                                            value: Expression::Number(Number {
+                                                                          value: 0x19,
+                                                                          width:
+                                                                              NumberWidth::OneByte,
+                                                                      }),
+                                        }));
+    assert_eq!(result, expected);
+}

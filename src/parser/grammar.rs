@@ -53,23 +53,34 @@ named!(pub statement<&str, Statement>, ws!(alt!(
     opcode => { |opcode| Statement::Opcode(opcode) }
 )));
 
+named!(address_mode<&str, OpcodeMode>, map!(
+    opt!(ws!(pair!(tag!(","), one_of!("xys")))),
+    |result| match result {
+        None => OpcodeMode::Address,
+        Some((_, 'x')) => OpcodeMode::XAddress,
+        Some((_, 'y')) => OpcodeMode::YAddress,
+        Some((_, 's')) => OpcodeMode::StackAddress,
+        _ => unreachable!(),
+    }
+));
+
 named!(opcode<&str, Opcode>, do_parse!(
     opcode: identifier >>
     mode: opt!(ws!(pair!(tag!("."), one_of!("bBwWlL")))) >>
     result: ws!(alt!(
-        pair!(tag!("#"), expression) => { |(_, expression)| (OpcodeMode::Immediate, expression) } |
-        delimited!(tag!("("), expression, pair!(tag!(")"), not!(one_of!("+-*/")))) => { |expression|
-            (OpcodeMode::Indirect, expression)
+        pair!(tag!("#"), expression) => { |(_, expression)| (expression, OpcodeMode::Immediate) } |
+        delimited!(tag!("("), expression, pair!(tag!(")"), not!(one_of!("+-*/")))) => { |result|
+            (result, OpcodeMode::Indirect)
         } |
-        pair!(expression, opt!(ws!(pair!(tag!(","), one_of!("xys"))))) => { |(expression, mode)|
-            (match mode {
-                None => OpcodeMode::Address,
-                Some((_, 'x')) => OpcodeMode::XAddress,
-                Some((_, 'y')) => OpcodeMode::YAddress,
-                Some((_, 's')) => OpcodeMode::StackAddress,
-                _ => unreachable!(),
-            }, expression)
-        }
+        do_parse!(
+            tag!("(") >>
+            expression: expression >>
+            tag!(",") >>
+            tag!("x") >>
+            tag!(")") >>
+            (expression, OpcodeMode::XIndirect)
+        ) |
+        pair!(expression, address_mode)
     )) >>
     (Opcode {
         name: opcode,
@@ -79,8 +90,8 @@ named!(opcode<&str, Opcode>, do_parse!(
             'l'|'L' => 3,
             _ => unreachable!(),
         }),
-        mode: result.0,
-        value: result.1,
+        value: result.0,
+        mode: result.1,
     })
 ));
 
