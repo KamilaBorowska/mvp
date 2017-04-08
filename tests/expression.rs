@@ -87,9 +87,8 @@ fn reject_huge_numbers() {
 fn no_function_call_tuples() {
     let input = "f((1, 2))";
     let result = grammar::expression(input);
-    let expected =
-        IResult::Done("((1, 2))",
-                      Expression::Variable(Label::Named(VariableName("f"))));
+    let expected = IResult::Done("((1, 2))",
+                                 Expression::Variable(Label::Named(VariableName("f"))));
     assert_eq!(result, expected);
 }
 
