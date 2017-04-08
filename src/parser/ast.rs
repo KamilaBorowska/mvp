@@ -46,9 +46,6 @@ pub enum OpcodeMode {
     Implied, // no argument
     Immediate, // #$
     Address, // $
-    XAddress, // $,x
-    YAddress, // $,y
-    StackAddress, // $,s
     Indirect, // ($)
     XIndirect, // ($,x)
     IndirectY, // ($),y

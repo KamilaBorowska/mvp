@@ -1,6 +1,6 @@
 extern crate mvp;
 
-use mvp::parser::ast::{BinaryOperator, Expression, Number, NumberWidth, VariableName};
+use mvp::parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, VariableName};
 use mvp::parser::grammar::{self, IResult};
 
 macro_rules! binary_op {
@@ -87,7 +87,11 @@ fn reject_huge_numbers() {
 fn no_function_call_tuples() {
     let input = "f((1, 2))";
     let result = grammar::expression(input);
-    assert!(result.is_err());
+    let expected =
+        IResult::Done("((1, 2))",
+                      Expression::Variable(Label::Named(VariableName(String::from("f")
+                                                                         .into_boxed_str()))));
+    assert_eq!(result, expected);
 }
 
 #[test]

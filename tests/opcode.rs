@@ -1,7 +1,7 @@
 extern crate mvp;
 
-use mvp::parser::ast::{BinaryOperator, Expression, Number, NumberWidth, Opcode, OpcodeMode,
-                       Statement};
+use mvp::parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, Opcode, OpcodeMode,
+                       Statement, VariableName};
 use mvp::parser::grammar::{statement, IResult};
 
 fn opcode(width: Option<u32>, mode: OpcodeMode) -> Statement {
@@ -138,33 +138,41 @@ fn opcode_width_with_spaces() {
 
 #[test]
 fn x_address() {
-    let input = "LDA 19,x";
+    let input = "LDA 19,x:";
     let result = statement(input);
-    let expected = IResult::Done("", opcode(None, OpcodeMode::XAddress));
+    let second = Expression::Variable(Label::Named(VariableName(String::from("x")
+                                                                    .into_boxed_str())));
+    let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn case_insensitive_x_address() {
-    let input = "LDA 19 , X";
+    let input = "LDA 19 , X:";
     let result = statement(input);
-    let expected = IResult::Done("", opcode(None, OpcodeMode::XAddress));
+    let second = Expression::Variable(Label::Named(VariableName(String::from("X")
+                                                                    .into_boxed_str())));
+    let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn y_address() {
-    let input = "LDA 19 , y ";
+    let input = "LDA 19 , y :";
     let result = statement(input);
-    let expected = IResult::Done("", opcode(None, OpcodeMode::YAddress));
+    let second = Expression::Variable(Label::Named(VariableName(String::from("y")
+                                                                    .into_boxed_str())));
+    let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn stack_address() {
-    let input = " LDA 19    ,    s  ";
+    let input = " LDA 19    ,    s  :";
     let result = statement(input);
-    let expected = IResult::Done("", opcode(None, OpcodeMode::StackAddress));
+    let second = Expression::Variable(Label::Named(VariableName(String::from("s")
+                                                                    .into_boxed_str())));
+    let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
     assert_eq!(result, expected);
 }
 

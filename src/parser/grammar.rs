@@ -6,8 +6,8 @@
 //! text left to parse, and second is retrieved AST value.
 //! `IResult::Error` means that parse did fail.
 
-use parser::ast::{BinaryOperator, Expression, Number, NumberWidth, Opcode, OpcodeMode, Statement,
-                  VariableName};
+use parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, Opcode, OpcodeMode,
+                  Statement, VariableName};
 
 use std::str::{self, FromStr};
 
@@ -112,22 +112,17 @@ named!(long_indirect_y<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
     (res.0, OpcodeMode::LongIndirectY)
 )));
 
-named!(address<&str, (Expression, OpcodeMode)>, do_parse!(
-    expression: expression >>
-    mode: opt!(address_mode) >>
-    (expression, mode.unwrap_or(OpcodeMode::Address))
+named!(address_pair<&str, (Expression, OpcodeMode)>, do_parse!(
+    first: expression >>
+    tag!(",") >>
+    second: expression >>
+    (first, OpcodeMode::Move { second: second })
 ));
 
-named!(address_mode<&str, OpcodeMode>, ws!(do_parse!(
-    tag!(",") >>
-    mode: alt!(
-        one_of!("xX") => {|_| OpcodeMode::XAddress } |
-        one_of!("yY") => {|_| OpcodeMode::YAddress } |
-        one_of!("sS") => {|_| OpcodeMode::StackAddress } |
-        expression => {|expression| OpcodeMode::Move { second: expression }}
-    ) >>
-    (mode)
-)));
+named!(address<&str, (Expression, OpcodeMode)>, do_parse!(
+    expression: expression >>
+    (expression, OpcodeMode::Address)
+));
 
 named!(opcode<&str, Opcode>, do_parse!(
     opcode: identifier >>
@@ -137,6 +132,7 @@ named!(opcode<&str, Opcode>, do_parse!(
         indirect_y |
         indirect |
         x_indirect |
+        address_pair |
         address |
         long_indirect_y |
         long_indirect |
@@ -180,6 +176,8 @@ pub assignment<&str, Statement>, ws!(do_parse!(
     (Statement::Assignment(VariableName(name), value))
 )));
 
+named!(label<&str, Label>, map!(identifier, |name| Label::Named(VariableName(name))));
+
 named!(
 /// An expression parser.
 ///
@@ -205,7 +203,7 @@ named!(
 ///     ));
 ///     assert_eq!(parsed, expected);
 ,
-pub expression<&str, Expression>, do_parse!(
+pub expression<&str, Expression>, ws!(do_parse!(
     init: term >>
     res: fold_many0!(
         pair!(alt!(
@@ -218,7 +216,7 @@ pub expression<&str, Expression>, do_parse!(
         }
     ) >>
     (res)
-));
+)));
 
 named!(term<&str, Expression>, do_parse!(
     init: top_expression >>
@@ -235,7 +233,13 @@ named!(term<&str, Expression>, do_parse!(
     (res)
 ));
 
-named!(top_expression<&str, Expression>, alt!(paren_expression | number | hex_number | call));
+named!(top_expression<&str, Expression>, alt!(
+    paren_expression |
+    number |
+    hex_number |
+    call |
+    variable
+));
 
 named!(paren_expression<&str, Expression>, ws!(delimited!(tag!("("), expression, tag!(")"))));
 
@@ -276,3 +280,5 @@ named!(call<&str, Expression>, ws!(do_parse!(
     ) >>
     (Expression::Call(VariableName(identifier), parts))
 )));
+
+named!(variable<&str, Expression>, map!(label, Expression::Variable));
