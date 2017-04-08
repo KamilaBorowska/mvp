@@ -87,6 +87,17 @@ named!(indirect_y<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
     (expression, OpcodeMode::IndirectY)
 )));
 
+named!(stack_indirect_y<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+    tag!("(") >>
+    expression: expression >>
+    tag!(",") >>
+    tag!("s") >>
+    tag!(")") >>
+    tag!(",") >>
+    tag!("y") >>
+    (expression, OpcodeMode::StackIndirectY)
+)));
+
 named!(address<&str, (Expression, OpcodeMode)>, pair!(expression, address_mode));
 
 named!(address_mode<&str, OpcodeMode>, map!(
@@ -103,7 +114,14 @@ named!(address_mode<&str, OpcodeMode>, map!(
 named!(opcode<&str, Opcode>, do_parse!(
     opcode: identifier >>
     mode: opt!(ws!(pair!(tag!("."), one_of!("bBwWlL")))) >>
-    result: alt!(immediate | indirect_y | indirect | x_indirect | address) >>
+    result: alt!(
+        immediate |
+        indirect_y |
+        indirect |
+        x_indirect |
+        address |
+        stack_indirect_y
+    ) >>
     (Opcode {
         name: opcode,
         width: mode.map(|(_, letter)| match letter {

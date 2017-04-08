@@ -302,3 +302,21 @@ fn indirect_y() {
                                         }));
     assert_eq!(result, expected);
 }
+
+#[test]
+fn stack_indirect_y() {
+    let input = " LDA ( 33 , s ) , y ";
+    let result = statement(input);
+    let expected =
+        IResult::Done("",
+                      Statement::Opcode(Opcode {
+                                            name: String::from("LDA"),
+                                            width: None,
+                                            mode: OpcodeMode::StackIndirectY,
+                                            value: Expression::Number(Number {
+                                                                          value: 33,
+                                                                          width: NumberWidth::None,
+                                                                      }),
+                                        }));
+    assert_eq!(result, expected);
+}
