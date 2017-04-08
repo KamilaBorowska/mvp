@@ -374,3 +374,25 @@ fn long_indirect_y() {
                                         }));
     assert_eq!(result, expected);
 }
+
+#[test]
+fn move_mode() {
+    let input = " MVP 1 , 2 ";
+    let result = statement(input);
+    let first = Expression::Number(Number {
+                                       value: 1,
+                                       width: NumberWidth::None,
+                                   });
+    let second = Expression::Number(Number {
+                                        value: 2,
+                                        width: NumberWidth::None,
+                                    });
+    let expected = IResult::Done("",
+                                 Statement::Opcode(Opcode {
+                                                       name: String::from("MVP"),
+                                                       width: None,
+                                                       mode: OpcodeMode::Move { second: second },
+                                                       value: first,
+                                                   }));
+    assert_eq!(result, expected);
+}

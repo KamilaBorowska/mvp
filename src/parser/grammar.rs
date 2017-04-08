@@ -112,18 +112,22 @@ named!(long_indirect_y<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
     (res.0, OpcodeMode::LongIndirectY)
 )));
 
-named!(address<&str, (Expression, OpcodeMode)>, pair!(expression, address_mode));
-
-named!(address_mode<&str, OpcodeMode>, map!(
-    opt!(ws!(pair!(tag!(","), one_of!("xysXYS")))),
-    |result| match result {
-        None => OpcodeMode::Address,
-        Some((_, 'x')) | Some((_, 'X')) => OpcodeMode::XAddress,
-        Some((_, 'y')) | Some((_, 'Y')) => OpcodeMode::YAddress,
-        Some((_, 's')) | Some((_, 'S')) => OpcodeMode::StackAddress,
-        _ => unreachable!(),
-    }
+named!(address<&str, (Expression, OpcodeMode)>, do_parse!(
+    expression: expression >>
+    mode: opt!(address_mode) >>
+    (expression, mode.unwrap_or(OpcodeMode::Address))
 ));
+
+named!(address_mode<&str, OpcodeMode>, ws!(do_parse!(
+    tag!(",") >>
+    mode: alt!(
+        one_of!("xX") => {|_| OpcodeMode::XAddress } |
+        one_of!("yY") => {|_| OpcodeMode::YAddress } |
+        one_of!("sS") => {|_| OpcodeMode::StackAddress } |
+        expression => {|expression| OpcodeMode::Move { second: expression }}
+    ) >>
+    (mode)
+)));
 
 named!(opcode<&str, Opcode>, do_parse!(
     opcode: identifier >>

@@ -55,7 +55,7 @@ pub enum OpcodeMode {
     StackIndirectY, // ($,s),y
     LongIndirect, // [$]
     LongIndirectY, // [$],y
-    Move { first_bank: Expression }, // $,$
+    Move { second: Expression }, // $,$
     Accumulator, // A
 }
 
