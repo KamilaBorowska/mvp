@@ -34,7 +34,7 @@ macro_rules! tree_meta {
                 let items = [args[0].clone(), args[1].clone()];
                 Expression::Binary(binary_op!($f), Box::new(items))
             }
-            name => Expression::Call(VariableName(String::from(name).into_boxed_str()), args),
+            name => Expression::Call(VariableName(name), args),
         }
     }};
     ($number:expr) => {
@@ -89,8 +89,7 @@ fn no_function_call_tuples() {
     let result = grammar::expression(input);
     let expected =
         IResult::Done("((1, 2))",
-                      Expression::Variable(Label::Named(VariableName(String::from("f")
-                                                                         .into_boxed_str()))));
+                      Expression::Variable(Label::Named(VariableName("f"))));
     assert_eq!(result, expected);
 }
 

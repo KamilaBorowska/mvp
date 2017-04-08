@@ -11,13 +11,11 @@ use parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, Opcode
 
 use std::str::{self, FromStr};
 
-use nom;
+use nom::{self, ErrorKind, Needed};
 pub use nom::IResult;
 use unicode_xid::UnicodeXID;
 
-fn valid_identifier_first_character(result: &str) -> bool {
-    let message = "take_s did not take one parameter";
-    let result = result.chars().next().expect(message);
+fn valid_identifier_first_character(result: char) -> bool {
     result == '!' || result == '_' || UnicodeXID::is_xid_start(result)
 }
 
@@ -27,7 +25,6 @@ fn valid_later_character(c: char) -> bool {
 
 const OPERATORS: &'static str = "+-*/";
 
-named!(
 /// An identifier parser.
 ///
 /// It allows any Unicode identifier as specified by [Unicode Standard Annex #31:
@@ -43,13 +40,21 @@ named!(
 ///     use mvp::parser::grammar::{self, IResult};
 ///
 ///     let parsed = grammar::identifier("世界");
-///     assert_eq!(parsed, IResult::Done("", String::from("世界").into_boxed_str()));
-,
-pub identifier<&str, Box<str>>, do_parse!(
-    first: verify!(take_s!(1), valid_identifier_first_character) >>
-    res: take_while_s!(valid_later_character) >>
-    (format!("{}{}", first, res).into_boxed_str())
-));
+///     assert_eq!(parsed, IResult::Done("", "世界"));
+pub fn identifier(input: &str) -> IResult<&str, &str, u32> {
+    let mut indices = input.char_indices();
+    match indices.next() {
+        Some((_, c)) if valid_identifier_first_character(c) => {}
+        Some(_) => return IResult::Error(ErrorKind::Alpha),
+        None => return IResult::Incomplete(Needed::Unknown),
+    };
+    for (pos, c) in indices {
+        if !valid_later_character(c) {
+            return IResult::Done(&input[pos..], &input[..pos]);
+        }
+    }
+    return IResult::Done("", input);
+}
 
 named!(pub statement<&str, Statement>, ws!(alt!(
     opcode => { |opcode| Statement::Opcode(opcode) }
@@ -164,7 +169,7 @@ named!(
 ///
 ///     let parsed = grammar::assignment("hello = 44");
 ///     let expected = Statement::Assignment(
-///         VariableName(String::from("hello").into_boxed_str()),
+///         VariableName("hello"),
 ///         Expression::Number(Number { value: 44, width: NumberWidth::None }),
 ///     );
 ///     assert_eq!(parsed, IResult::Done("", expected));

@@ -2,15 +2,15 @@
 
 /// A unit that can stand by itself in a program.
 #[derive(Debug, Eq, PartialEq)]
-pub enum Statement {
+pub enum Statement<'a> {
     /// Label declaration.
-    Label(Label),
+    Label(Label<'a>),
     /// Processor operation.
-    Opcode(Opcode),
+    Opcode(Opcode<'a>),
     /// Group of if blocks, possibly with else if conditions.
-    If(Vec<Condition>),
+    If(Vec<Condition<'a>>),
     /// Assignment of `Expression` to `VariableName`.
-    Assignment(VariableName, Expression),
+    Assignment(VariableName<'a>, Expression<'a>),
 }
 
 /// An unique name of an identifier in a program.
@@ -19,7 +19,7 @@ pub enum Statement {
 /// however variable names are in grammar to support those cases where
 /// a relative label reference is not acceptable, in particular assignments.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct VariableName(pub Box<str>);
+pub struct VariableName<'a>(pub &'a str);
 
 /// A reference to a location in assembly.
 ///
@@ -28,21 +28,21 @@ pub struct VariableName(pub Box<str>);
 /// mean backward references, while positive numbers mean forward
 /// references.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum Label {
-    Named(VariableName),
+pub enum Label<'a> {
+    Named(VariableName<'a>),
     Relative(i32),
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Opcode {
-    pub name: Box<str>,
+pub struct Opcode<'a> {
+    pub name: &'a str,
     pub width: Option<u32>,
-    pub mode: OpcodeMode,
-    pub value: Expression,
+    pub mode: OpcodeMode<'a>,
+    pub value: Expression<'a>,
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum OpcodeMode {
+pub enum OpcodeMode<'a> {
     Implied, // no argument
     Immediate, // #$
     Address, // $
@@ -52,7 +52,7 @@ pub enum OpcodeMode {
     StackIndirectY, // ($,s),y
     LongIndirect, // [$]
     LongIndirectY, // [$],y
-    Move { second: Expression }, // $,$
+    Move { second: Expression<'a> }, // $,$
     Accumulator, // A
 }
 
@@ -61,9 +61,9 @@ pub enum OpcodeMode {
 /// This is usually used in a `Vec`, and represents a single predicate along
 /// with statements to run if it is met.
 #[derive(Debug, Eq, PartialEq)]
-pub struct Condition {
-    pub predicate: Option<Expression>,
-    pub statements: Vec<Statement>,
+pub struct Condition<'a> {
+    pub predicate: Option<Expression<'a>>,
+    pub statements: Vec<Statement<'a>>,
 }
 
 /// An operator that takes two arguments
@@ -128,16 +128,16 @@ pub enum NumberWidth {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum Expression {
+pub enum Expression<'a> {
     Number(Number),
-    Variable(Label),
-    Binary(BinaryOperator, Box<[Expression; 2]>),
-    Call(VariableName, Vec<Expression>),
+    Variable(Label<'a>),
+    Binary(BinaryOperator, Box<[Expression<'a>; 2]>),
+    Call(VariableName<'a>, Vec<Expression<'a>>),
 }
 
 // Workaround for a bug in Rust, derive when fixed
-impl Clone for Expression {
-    fn clone(&self) -> Expression {
+impl<'a> Clone for Expression<'a> {
+    fn clone(&self) -> Expression<'a> {
         use self::Expression::*;
         match *self {
             Number(ref number) => Number(number.clone()),

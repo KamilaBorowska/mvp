@@ -6,7 +6,7 @@ use mvp::parser::grammar::{statement, IResult};
 
 fn opcode(width: Option<u32>, mode: OpcodeMode) -> Statement {
     Statement::Opcode(Opcode {
-                          name: String::from("LDA").into_boxed_str(),
+                          name: "LDA",
                           width: width,
                           mode: mode,
                           value: Expression::Number(Number {
@@ -40,7 +40,7 @@ fn tricky_address() {
         ":",
         Statement::Opcode(
             Opcode {
-                name: String::from("LDA").into_boxed_str(),
+                name: "LDA",
                 width: None,
                 mode: OpcodeMode::Address,
                 value: Expression::Binary(
@@ -76,7 +76,7 @@ fn tricky_address_with_spaces() {
         ":",
         Statement::Opcode(
             Opcode {
-                name: String::from("LDA").into_boxed_str(),
+                name: "LDA",
                 width: None,
                 mode: OpcodeMode::Address,
                 value: Expression::Binary(
@@ -140,8 +140,7 @@ fn opcode_width_with_spaces() {
 fn x_address() {
     let input = "LDA 19,x:";
     let result = statement(input);
-    let second = Expression::Variable(Label::Named(VariableName(String::from("x")
-                                                                    .into_boxed_str())));
+    let second = Expression::Variable(Label::Named(VariableName("x")));
     let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
     assert_eq!(result, expected);
 }
@@ -150,8 +149,7 @@ fn x_address() {
 fn case_insensitive_x_address() {
     let input = "LDA 19 , X:";
     let result = statement(input);
-    let second = Expression::Variable(Label::Named(VariableName(String::from("X")
-                                                                    .into_boxed_str())));
+    let second = Expression::Variable(Label::Named(VariableName("X")));
     let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
     assert_eq!(result, expected);
 }
@@ -160,8 +158,7 @@ fn case_insensitive_x_address() {
 fn y_address() {
     let input = "LDA 19 , y :";
     let result = statement(input);
-    let second = Expression::Variable(Label::Named(VariableName(String::from("y")
-                                                                    .into_boxed_str())));
+    let second = Expression::Variable(Label::Named(VariableName("y")));
     let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
     assert_eq!(result, expected);
 }
@@ -170,8 +167,7 @@ fn y_address() {
 fn stack_address() {
     let input = " LDA 19    ,    s  :";
     let result = statement(input);
-    let second = Expression::Variable(Label::Named(VariableName(String::from("s")
-                                                                    .into_boxed_str())));
+    let second = Expression::Variable(Label::Named(VariableName("s")));
     let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
     assert_eq!(result, expected);
 }
