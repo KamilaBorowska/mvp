@@ -105,6 +105,13 @@ named!(long_indirect<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
     (expression, OpcodeMode::LongIndirect)
 )));
 
+named!(long_indirect_y<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+    res: long_indirect >>
+    tag!(",") >>
+    one_of!("yY") >>
+    (res.0, OpcodeMode::LongIndirectY)
+)));
+
 named!(address<&str, (Expression, OpcodeMode)>, pair!(expression, address_mode));
 
 named!(address_mode<&str, OpcodeMode>, map!(
@@ -127,6 +134,7 @@ named!(opcode<&str, Opcode>, do_parse!(
         indirect |
         x_indirect |
         address |
+        long_indirect_y |
         long_indirect |
         stack_indirect_y
     ) >>
