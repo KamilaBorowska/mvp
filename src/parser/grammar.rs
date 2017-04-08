@@ -128,12 +128,12 @@ named!(opcode<&str, Opcode>, do_parse!(
     opcode: identifier >>
     mode: opt!(ws!(pair!(tag!("."), one_of!("bBwWlL")))) >>
     result: alt!(
-        immediate |
         indirect_y |
         indirect |
         x_indirect |
         address_pair |
         address |
+        immediate |
         long_indirect_y |
         long_indirect |
         stack_indirect_y
