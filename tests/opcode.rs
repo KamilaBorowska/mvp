@@ -320,3 +320,21 @@ fn stack_indirect_y() {
                                         }));
     assert_eq!(result, expected);
 }
+
+#[test]
+fn long_indirect() {
+    let input = " LDA [ 33 ] ";
+    let result = statement(input);
+    let expected =
+        IResult::Done("",
+                      Statement::Opcode(Opcode {
+                                            name: String::from("LDA"),
+                                            width: None,
+                                            mode: OpcodeMode::LongIndirect,
+                                            value: Expression::Number(Number {
+                                                                          value: 33,
+                                                                          width: NumberWidth::None,
+                                                                      }),
+                                        }));
+    assert_eq!(result, expected);
+}
