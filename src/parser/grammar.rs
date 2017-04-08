@@ -53,7 +53,7 @@ pub fn identifier(input: &str) -> IResult<&str, &str, u32> {
             return IResult::Done(&input[pos..], &input[..pos]);
         }
     }
-    return IResult::Done("", input);
+    IResult::Done("", input)
 }
 
 named!(pub statement<&str, Statement>, ws!(alt!(
