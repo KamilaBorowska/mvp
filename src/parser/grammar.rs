@@ -91,10 +91,10 @@ named!(stack_indirect_y<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
     tag!("(") >>
     expression: expression >>
     tag!(",") >>
-    tag!("s") >>
+    one_of!("sS") >>
     tag!(")") >>
     tag!(",") >>
-    tag!("y") >>
+    one_of!("yY") >>
     (expression, OpcodeMode::StackIndirectY)
 )));
 

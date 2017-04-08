@@ -322,6 +322,24 @@ fn stack_indirect_y() {
 }
 
 #[test]
+fn case_insensitive_stack_indirect_y() {
+    let input = " LDA ( 33 , S ) , Y ";
+    let result = statement(input);
+    let expected =
+        IResult::Done("",
+                      Statement::Opcode(Opcode {
+                                            name: String::from("LDA"),
+                                            width: None,
+                                            mode: OpcodeMode::StackIndirectY,
+                                            value: Expression::Number(Number {
+                                                                          value: 33,
+                                                                          width: NumberWidth::None,
+                                                                      }),
+                                        }));
+    assert_eq!(result, expected);
+}
+
+#[test]
 fn long_indirect() {
     let input = " LDA [ 33 ] :";
     let result = statement(input);
