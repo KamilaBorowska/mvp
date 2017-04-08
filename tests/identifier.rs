@@ -11,7 +11,7 @@ macro_rules! test {
         #[test]
         fn $name() {
             let parsed = grammar::identifier($input);
-            assert_eq!(parsed, IResult::Done($unparsed, String::from($output)))
+            assert_eq!(parsed, IResult::Done($unparsed, String::from($output).into_boxed_str()));
         }
     };
 }

@@ -34,7 +34,7 @@ macro_rules! tree_meta {
                 let items = [args[0].clone(), args[1].clone()];
                 Expression::Binary(binary_op!($f), Box::new(items))
             }
-            name => Expression::Call(VariableName(String::from(name)), args),
+            name => Expression::Call(VariableName(String::from(name).into_boxed_str()), args),
         }
     }};
     ($number:expr) => {

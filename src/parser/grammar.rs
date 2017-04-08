@@ -43,12 +43,12 @@ named!(
 ///     use mvp::parser::grammar::{self, IResult};
 ///
 ///     let parsed = grammar::identifier("世界");
-///     assert_eq!(parsed, IResult::Done("", String::from("世界")));
+///     assert_eq!(parsed, IResult::Done("", String::from("世界").into_boxed_str()));
 ,
-pub identifier<&str, String>, do_parse!(
+pub identifier<&str, Box<str>>, do_parse!(
     first: verify!(take_s!(1), valid_identifier_first_character) >>
     res: take_while_s!(valid_later_character) >>
-    (format!("{}{}", first, res))
+    (format!("{}{}", first, res).into_boxed_str())
 ));
 
 named!(pub statement<&str, Statement>, ws!(alt!(
@@ -168,7 +168,7 @@ named!(
 ///
 ///     let parsed = grammar::assignment("hello = 44");
 ///     let expected = Statement::Assignment(
-///         VariableName(String::from("hello")),
+///         VariableName(String::from("hello").into_boxed_str()),
 ///         Expression::Number(Number { value: 44, width: NumberWidth::None }),
 ///     );
 ///     assert_eq!(parsed, IResult::Done("", expected));

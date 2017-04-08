@@ -19,7 +19,7 @@ pub enum Statement {
 /// however variable names are in grammar to support those cases where
 /// a relative label reference is not acceptable, in particular assignments.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct VariableName(pub String);
+pub struct VariableName(pub Box<str>);
 
 /// A reference to a location in assembly.
 ///
@@ -35,7 +35,7 @@ pub enum Label {
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Opcode {
-    pub name: String,
+    pub name: Box<str>,
     pub width: Option<u32>,
     pub mode: OpcodeMode,
     pub value: Expression,
