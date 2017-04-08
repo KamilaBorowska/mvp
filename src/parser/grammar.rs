@@ -37,10 +37,12 @@ const OPERATORS: &'static str = "+-*/";
 ///
 /// Parsing an Unicode identifier.
 ///
-///     use mvp::parser::grammar::{self, IResult};
+/// ```
+/// use mvp::parser::grammar::{self, IResult};
 ///
-///     let parsed = grammar::identifier("世界");
-///     assert_eq!(parsed, IResult::Done("", "世界"));
+/// let parsed = grammar::identifier("世界");
+/// assert_eq!(parsed, IResult::Done("", "世界"));
+/// ```
 pub fn identifier(input: &str) -> IResult<&str, &str, u32> {
     let mut indices = input.char_indices();
     match indices.next() {
@@ -164,15 +166,17 @@ named!(
 ///
 /// # Examples
 ///
-///     use mvp::parser::grammar::{self, IResult};
-///     use mvp::parser::ast::{Expression, Number, NumberWidth, Statement, VariableName};
+/// ```
+/// use mvp::parser::grammar::{self, IResult};
+/// use mvp::parser::ast::{Expression, Number, NumberWidth, Statement, VariableName};
 ///
-///     let parsed = grammar::assignment("hello = 44");
-///     let expected = Statement::Assignment(
-///         VariableName("hello"),
-///         Expression::Number(Number { value: 44, width: NumberWidth::None }),
-///     );
-///     assert_eq!(parsed, IResult::Done("", expected));
+/// let parsed = grammar::assignment("hello = 44");
+/// let expected = Statement::Assignment(
+///     VariableName("hello"),
+///     Expression::Number(Number { value: 44, width: NumberWidth::None }),
+/// );
+/// assert_eq!(parsed, IResult::Done("", expected));
+/// ```
 ,
 pub assignment<&str, Statement>, ws!(do_parse!(
     name: identifier >>
@@ -195,18 +199,20 @@ named!(
 ///
 /// Parsing a mathematical expression:
 ///
-///     use mvp::parser::grammar::{self, IResult};
-///     use mvp::parser::ast::{BinaryOperator, Expression, Number, NumberWidth};
+/// ```
+/// use mvp::parser::grammar::{self, IResult};
+/// use mvp::parser::ast::{BinaryOperator, Expression, Number, NumberWidth};
 ///
-///     let parsed = grammar::expression("2 + 3");
-///     let expected = IResult::Done("", Expression::Binary(
-///         BinaryOperator::Add,
-///         Box::new([
-///             Expression::Number(Number { value: 2, width: NumberWidth::None }),
-///             Expression::Number(Number { value: 3, width: NumberWidth::None }),
-///         ]),
-///     ));
-///     assert_eq!(parsed, expected);
+/// let parsed = grammar::expression("2 + 3");
+/// let expected = IResult::Done("", Expression::Binary(
+///     BinaryOperator::Add,
+///     Box::new([
+///         Expression::Number(Number { value: 2, width: NumberWidth::None }),
+///         Expression::Number(Number { value: 3, width: NumberWidth::None }),
+///     ]),
+/// ));
+/// assert_eq!(parsed, expected);
+/// ```
 ,
 pub expression<&str, Expression>, ws!(do_parse!(
     init: term >>
