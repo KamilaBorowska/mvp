@@ -2,13 +2,13 @@
 name = "mvp"
 version = "0.1.0"
 dependencies = [
- "nom 2.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "nom 3.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "unicode-xid 0.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "nom"
-version = "2.2.1"
+version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -17,5 +17,5 @@ version = "0.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
-"checksum nom 2.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cf51a729ecf40266a2368ad335a5fdde43471f545a967109cd62146ecf8b66ff"
+"checksum nom 3.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "5388009f277d5d889ee01f0ba92e3620c759402cdf52a8d40e9ac06969ee3c88"
 "checksum unicode-xid 0.0.4 (registry+https://github.com/rust-lang/crates.io-index)" = "8c1f860d7d29cf02cb2f3f359fd35991af3d30bac52c57d265a3c461074cb4dc"
