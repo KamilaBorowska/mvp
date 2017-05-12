@@ -5,4 +5,4 @@ authors = ["Konrad Borowski <xfix@protonmail.com>"]
 
 [dependencies]
 nom = "3.0.0"
-unicode-xid = "0.0.4"
+unicode-xid = "0.1.0"
