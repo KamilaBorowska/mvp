@@ -46,7 +46,7 @@ fn tricky_address() {
                 value: Expression::Binary(
                     BinaryOperator::Add,
                     Box::new(
-                        [
+                        (
                             Expression::Number(
                                 Number {
                                     value: 0x19,
@@ -59,7 +59,7 @@ fn tricky_address() {
                                     width: NumberWidth::None,
                                 },
                             ),
-                        ],
+                        ),
                     ),
                 ),
             },
@@ -82,7 +82,7 @@ fn tricky_address_with_spaces() {
                 value: Expression::Binary(
                     BinaryOperator::Add,
                     Box::new(
-                        [
+                        (
                             Expression::Number(
                                 Number {
                                     value: 0x19,
@@ -95,7 +95,7 @@ fn tricky_address_with_spaces() {
                                     width: NumberWidth::None,
                                 },
                             ),
-                        ],
+                        ),
                     ),
                 ),
             },

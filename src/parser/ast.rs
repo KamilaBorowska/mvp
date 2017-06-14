@@ -127,26 +127,10 @@ pub enum NumberWidth {
     TwoBytes,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Expression<'a> {
     Number(Number),
     Variable(Label<'a>),
-    Binary(BinaryOperator, Box<[Expression<'a>; 2]>),
+    Binary(BinaryOperator, Box<(Expression<'a>, Expression<'a>)>),
     Call(VariableName<'a>, Vec<Expression<'a>>),
-}
-
-// Workaround for a bug in Rust, derive when fixed
-impl<'a> Clone for Expression<'a> {
-    fn clone(&self) -> Expression<'a> {
-        use self::Expression::*;
-        match *self {
-            Number(ref number) => Number(number.clone()),
-            Variable(ref label) => Variable(label.clone()),
-            Binary(op, ref expressions) => {
-                Binary(op,
-                       Box::new([expressions[0].clone(), expressions[1].clone()]))
-            }
-            Call(ref name, ref expressions) => Call(name.clone(), expressions.clone()),
-        }
-    }
 }

@@ -31,7 +31,7 @@ macro_rules! tree_meta {
             "+"|"-"|"*"|"/" => {
                 // Expression::Binary expects two arguments, but the macro can be expanded
                 // even when there is more.
-                let items = [args[0].clone(), args[1].clone()];
+                let items = (args[0].clone(), args[1].clone());
                 Expression::Binary(binary_op!($f), Box::new(items))
             }
             name => Expression::Call(VariableName(name), args),
