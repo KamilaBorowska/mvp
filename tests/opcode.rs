@@ -2,7 +2,7 @@ extern crate mvp;
 
 use mvp::parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, Opcode, OpcodeMode,
                        Statement, VariableName};
-use mvp::parser::grammar::{statement, IResult};
+use mvp::parser::grammar::{CompleteStr, statement};
 
 fn opcode(width: Option<u32>, mode: OpcodeMode) -> Statement {
     Statement::Opcode(Opcode {
@@ -18,26 +18,26 @@ fn opcode(width: Option<u32>, mode: OpcodeMode) -> Statement {
 
 #[test]
 fn address() {
-    let input = "LDA 19 :";
+    let input = CompleteStr("LDA 19 :");
     let result = statement(input);
-    let expected = IResult::Done(":", opcode(None, OpcodeMode::Address));
+    let expected = Ok((CompleteStr(":"), opcode(None, OpcodeMode::Address)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn indirect() {
-    let input = "LDA (19) :";
+    let input = CompleteStr("LDA (19) :");
     let result = statement(input);
-    let expected = IResult::Done(":", opcode(None, OpcodeMode::Indirect));
+    let expected = Ok((CompleteStr(":"), opcode(None, OpcodeMode::Indirect)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn tricky_address() {
-    let input = "LDA ($19)+2 :";
+    let input = CompleteStr("LDA ($19)+2 :");
     let result = statement(input);
-    let expected = IResult::Done(
-        ":",
+    let expected = Ok((
+        CompleteStr(":"),
         Statement::Opcode(
             Opcode {
                 name: "LDA",
@@ -64,16 +64,16 @@ fn tricky_address() {
                 ),
             },
         ),
-    );
+    ));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn tricky_address_with_spaces() {
-    let input = "LDA ( $19 ) + 2 :";
+    let input = CompleteStr("LDA ( $19 ) + 2 :");
     let result = statement(input);
-    let expected = IResult::Done(
-        ":",
+    let expected = Ok((
+        CompleteStr(":"),
         Statement::Opcode(
             Opcode {
                 name: "LDA",
@@ -100,134 +100,134 @@ fn tricky_address_with_spaces() {
                 ),
             },
         ),
-    );
+    ));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn immediate() {
-    let input = "LDA # 19";
+    let input = CompleteStr("LDA # 19");
     let result = statement(input);
-    let expected = IResult::Done("", opcode(None, OpcodeMode::Immediate));
+    let expected = Ok((CompleteStr(""), opcode(None, OpcodeMode::Immediate)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn opcode_width() {
-    let input = "LDA.w # ( 19 )";
+    let input = CompleteStr("LDA.w # ( 19 )");
     let result = statement(input);
-    let expected = IResult::Done("", opcode(Some(2), OpcodeMode::Immediate));
+    let expected = Ok((CompleteStr(""), opcode(Some(2), OpcodeMode::Immediate)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn uppercase_opcode_width() {
-    let input = "LDA.W # (19)";
+    let input = CompleteStr("LDA.W # (19)");
     let result = statement(input);
-    let expected = IResult::Done("", opcode(Some(2), OpcodeMode::Immediate));
+    let expected = Ok((CompleteStr(""), opcode(Some(2), OpcodeMode::Immediate)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn opcode_width_with_spaces() {
-    let input = "LDA . w #19";
+    let input = CompleteStr("LDA . w #19");
     let result = statement(input);
-    let expected = IResult::Done("", opcode(Some(2), OpcodeMode::Immediate));
+    let expected = Ok((CompleteStr(""), opcode(Some(2), OpcodeMode::Immediate)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn x_address() {
-    let input = "LDA 19,x:";
+    let input = CompleteStr("LDA 19,x:");
     let result = statement(input);
     let second = Expression::Variable(Label::Named(VariableName("x")));
-    let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
+    let expected = Ok((CompleteStr(":"), opcode(None, OpcodeMode::Move { second: second })));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn case_insensitive_x_address() {
-    let input = "LDA 19 , X:";
+    let input = CompleteStr("LDA 19 , X:");
     let result = statement(input);
     let second = Expression::Variable(Label::Named(VariableName("X")));
-    let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
+    let expected = Ok((CompleteStr(":"), opcode(None, OpcodeMode::Move { second: second })));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn y_address() {
-    let input = "LDA 19 , y :";
+    let input = CompleteStr("LDA 19 , y :");
     let result = statement(input);
     let second = Expression::Variable(Label::Named(VariableName("y")));
-    let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
+    let expected = Ok((CompleteStr(":"), opcode(None, OpcodeMode::Move { second: second })));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn stack_address() {
-    let input = " LDA 19    ,    s  :";
+    let input = CompleteStr(" LDA 19    ,    s  :");
     let result = statement(input);
     let second = Expression::Variable(Label::Named(VariableName("s")));
-    let expected = IResult::Done(":", opcode(None, OpcodeMode::Move { second: second }));
+    let expected = Ok((CompleteStr(":"), opcode(None, OpcodeMode::Move { second: second })));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn x_indirect() {
-    let input = "LDA ( 19 , x ) ";
+    let input = CompleteStr("LDA ( 19 , x ) ");
     let result = statement(input);
-    let expected = IResult::Done("", opcode(None, OpcodeMode::XIndirect));
+    let expected = Ok((CompleteStr(""), opcode(None, OpcodeMode::XIndirect)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn indirect_y() {
-    let input = " LDA ( 19 ) , y ";
+    let input = CompleteStr(" LDA ( 19 ) , y ");
     let result = statement(input);
-    let expected = IResult::Done("", opcode(None, OpcodeMode::IndirectY));
+    let expected = Ok((CompleteStr(""), opcode(None, OpcodeMode::IndirectY)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn stack_indirect_y() {
-    let input = " LDA ( 19 , s ) , y ";
+    let input = CompleteStr(" LDA ( 19 , s ) , y ");
     let result = statement(input);
-    let expected = IResult::Done("", opcode(None, OpcodeMode::StackIndirectY));
+    let expected = Ok((CompleteStr(""), opcode(None, OpcodeMode::StackIndirectY)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn case_insensitive_stack_indirect_y() {
-    let input = " LDA ( 19 , S ) , Y ";
+    let input = CompleteStr(" LDA ( 19 , S ) , Y ");
     let result = statement(input);
-    let expected = IResult::Done("", opcode(None, OpcodeMode::StackIndirectY));
+    let expected = Ok((CompleteStr(""), opcode(None, OpcodeMode::StackIndirectY)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn long_indirect() {
-    let input = " LDA [ 19 ] :";
+    let input = CompleteStr(" LDA [ 19 ] :");
     let result = statement(input);
-    let expected = IResult::Done(":", opcode(None, OpcodeMode::LongIndirect));
+    let expected = Ok((CompleteStr(":"), opcode(None, OpcodeMode::LongIndirect)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn long_indirect_y() {
-    let input = " LDA [ 19 ] , y ";
+    let input = CompleteStr(" LDA [ 19 ] , y ");
     let result = statement(input);
-    let expected = IResult::Done("", opcode(None, OpcodeMode::LongIndirectY));
+    let expected = Ok((CompleteStr(""), opcode(None, OpcodeMode::LongIndirectY)));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn move_mode() {
-    let input = " LDA 19 , 2 ";
+    let input = CompleteStr(" LDA 19 , 2 ");
     let result = statement(input);
     let second = Expression::Number(Number {
                                         value: 2,
                                         width: NumberWidth::None,
                                     });
-    let expected = IResult::Done("", opcode(None, OpcodeMode::Move { second: second }));
+    let expected = Ok((CompleteStr(""), opcode(None, OpcodeMode::Move { second: second })));
     assert_eq!(result, expected);
 }

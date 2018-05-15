@@ -1,18 +1,17 @@
 //! Grammar AST parser.
 //!
-//! Many methods in this module return `IResult<&str, O>` as an argument. It is
-//! actually an enum defined by `nom` which represents parsing result.
-//! `IResult::Done` is a tuple enum value where the first argument is
-//! text left to parse, and second is retrieved AST value.
-//! `IResult::Error` means that parse did fail.
+//! Many methods in this module return `Result<(CompleteStr, O), nom::Err<CompleteStr>>`
+//! as an argument. If the result is `Ok`, the variant contains a tuple where the first
+//! argument is text left to parse, and second is retrieved AST value.
+//! `Err` means that parse did fail.
 
 use parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, Opcode, OpcodeMode,
                   Statement, VariableName};
 
 use std::str::{self, FromStr};
 
-use nom::{self, ErrorKind, Needed};
-pub use nom::IResult;
+use nom::{self, ErrorKind};
+pub use nom::types::CompleteStr;
 use unicode_xid::UnicodeXID;
 
 fn valid_identifier_first_character(result: char) -> bool {
@@ -38,37 +37,36 @@ const OPERATORS: &'static str = "+-*/";
 /// Parsing an Unicode identifier.
 ///
 /// ```
-/// use mvp::parser::grammar::{self, IResult};
+/// use mvp::parser::grammar::{self, CompleteStr};
 ///
-/// let parsed = grammar::identifier("世界");
-/// assert_eq!(parsed, IResult::Done("", "世界"));
+/// let parsed = grammar::identifier(CompleteStr("世界"));
+/// assert_eq!(parsed, Ok((CompleteStr(""), "世界")));
 /// ```
-pub fn identifier(input: &str) -> IResult<&str, &str, u32> {
+pub fn identifier(input: CompleteStr) -> Result<(CompleteStr, &str), nom::Err<CompleteStr>> {
     let mut indices = input.char_indices();
     match indices.next() {
         Some((_, c)) if valid_identifier_first_character(c) => {}
-        Some(_) => return IResult::Error(ErrorKind::Alpha),
-        None => return IResult::Incomplete(Needed::Unknown),
+        _ => return Err(nom::Err::Error(error_position!(input, ErrorKind::Alpha))),
     };
     for (pos, c) in indices {
         if !valid_later_character(c) {
-            return IResult::Done(&input[pos..], &input[..pos]);
+            return Ok((CompleteStr(&input[pos..]), &input[..pos]));
         }
     }
-    IResult::Done("", input)
+    Ok((CompleteStr(""), &input))
 }
 
-named!(pub statement<&str, Statement>, ws!(alt!(
+named!(pub statement<CompleteStr, Statement>, ws!(alt!(
     opcode => { |opcode| Statement::Opcode(opcode) }
 )));
 
-named!(immediate<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+named!(immediate<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     tag!("#") >>
     expression: expression >>
     (expression, OpcodeMode::Immediate)
 )));
 
-named!(indirect<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+named!(indirect<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     tag!("(") >>
     expression: expression >>
     tag!(")") >>
@@ -76,7 +74,7 @@ named!(indirect<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
     (expression, OpcodeMode::Indirect)
 )));
 
-named!(x_indirect<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+named!(x_indirect<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     tag!("(") >>
     expression: expression >>
     tag!(",") >>
@@ -85,7 +83,7 @@ named!(x_indirect<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
     (expression, OpcodeMode::XIndirect)
 )));
 
-named!(indirect_y<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+named!(indirect_y<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     tag!("(") >>
     expression: expression >>
     tag!(")") >>
@@ -94,7 +92,7 @@ named!(indirect_y<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
     (expression, OpcodeMode::IndirectY)
 )));
 
-named!(stack_indirect_y<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+named!(stack_indirect_y<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     tag!("(") >>
     expression: expression >>
     tag!(",") >>
@@ -105,33 +103,33 @@ named!(stack_indirect_y<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
     (expression, OpcodeMode::StackIndirectY)
 )));
 
-named!(long_indirect<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+named!(long_indirect<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     tag!("[") >>
     expression: expression >>
     tag!("]") >>
     (expression, OpcodeMode::LongIndirect)
 )));
 
-named!(long_indirect_y<&str, (Expression, OpcodeMode)>, ws!(do_parse!(
+named!(long_indirect_y<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     res: long_indirect >>
     tag!(",") >>
     one_of!("yY") >>
     (res.0, OpcodeMode::LongIndirectY)
 )));
 
-named!(address_pair<&str, (Expression, OpcodeMode)>, do_parse!(
+named!(address_pair<CompleteStr, (Expression, OpcodeMode)>, do_parse!(
     first: expression >>
     tag!(",") >>
     second: expression >>
     (first, OpcodeMode::Move { second: second })
 ));
 
-named!(address<&str, (Expression, OpcodeMode)>, do_parse!(
+named!(address<CompleteStr, (Expression, OpcodeMode)>, do_parse!(
     expression: expression >>
     (expression, OpcodeMode::Address)
 ));
 
-named!(opcode<&str, Opcode>, do_parse!(
+named!(opcode<CompleteStr, Opcode>, do_parse!(
     opcode: identifier >>
     mode: opt!(ws!(pair!(tag!("."), one_of!("bBwWlL")))) >>
     result: alt!(
@@ -146,7 +144,7 @@ named!(opcode<&str, Opcode>, do_parse!(
         stack_indirect_y
     ) >>
     (Opcode {
-        name: opcode,
+        name: &opcode,
         width: mode.map(|(_, letter)| match letter {
             'b'|'B' => 1,
             'w'|'W' => 2,
@@ -167,25 +165,25 @@ named!(
 /// # Examples
 ///
 /// ```
-/// use mvp::parser::grammar::{self, IResult};
+/// use mvp::parser::grammar::{self, CompleteStr};
 /// use mvp::parser::ast::{Expression, Number, NumberWidth, Statement, VariableName};
 ///
-/// let parsed = grammar::assignment("hello = 44");
+/// let parsed = grammar::assignment(CompleteStr("hello = 44"));
 /// let expected = Statement::Assignment(
 ///     VariableName("hello"),
 ///     Expression::Number(Number { value: 44, width: NumberWidth::None }),
 /// );
-/// assert_eq!(parsed, IResult::Done("", expected));
+/// assert_eq!(parsed, Ok((CompleteStr(""), expected)));
 /// ```
 ,
-pub assignment<&str, Statement>, ws!(do_parse!(
+pub assignment<CompleteStr, Statement>, ws!(do_parse!(
     name: identifier >>
     tag!("=") >>
     value: expression >>
-    (Statement::Assignment(VariableName(name), value))
+    (Statement::Assignment(VariableName(&name), value))
 )));
 
-named!(label<&str, Label>, map!(identifier, |name| Label::Named(VariableName(name))));
+named!(label<CompleteStr, Label>, map!(identifier, |name| Label::Named(VariableName(&name))));
 
 named!(
 /// An expression parser.
@@ -200,21 +198,21 @@ named!(
 /// Parsing a mathematical expression:
 ///
 /// ```
-/// use mvp::parser::grammar::{self, IResult};
+/// use mvp::parser::grammar::{self, CompleteStr};
 /// use mvp::parser::ast::{BinaryOperator, Expression, Number, NumberWidth};
 ///
-/// let parsed = grammar::expression("2 + 3");
-/// let expected = IResult::Done("", Expression::Binary(
+/// let parsed = grammar::expression(CompleteStr("2 + 3"));
+/// let expected = Ok((CompleteStr(""), Expression::Binary(
 ///     BinaryOperator::Add,
 ///     Box::new((
 ///         Expression::Number(Number { value: 2, width: NumberWidth::None }),
 ///         Expression::Number(Number { value: 3, width: NumberWidth::None }),
 ///     )),
-/// ));
+/// )));
 /// assert_eq!(parsed, expected);
 /// ```
 ,
-pub expression<&str, Expression>, ws!(do_parse!(
+pub expression<CompleteStr, Expression>, ws!(do_parse!(
     init: term >>
     res: fold_many0!(
         pair!(alt!(
@@ -229,7 +227,7 @@ pub expression<&str, Expression>, ws!(do_parse!(
     (res)
 )));
 
-named!(term<&str, Expression>, do_parse!(
+named!(term<CompleteStr, Expression>, do_parse!(
     init: top_expression >>
     res: fold_many0!(
         pair!(alt!(
@@ -244,7 +242,7 @@ named!(term<&str, Expression>, do_parse!(
     (res)
 ));
 
-named!(top_expression<&str, Expression>, alt!(
+named!(top_expression<CompleteStr, Expression>, alt!(
     paren_expression |
     number |
     hex_number |
@@ -252,12 +250,12 @@ named!(top_expression<&str, Expression>, alt!(
     variable
 ));
 
-named!(paren_expression<&str, Expression>, ws!(delimited!(tag!("("), expression, tag!(")"))));
+named!(paren_expression<CompleteStr, Expression>, ws!(delimited!(tag!("("), expression, tag!(")"))));
 
-named!(number<&str, Expression>, map!(
+named!(number<CompleteStr, Expression>, map!(
     map_res!(
         ws!(nom::digit),
-        u32::from_str
+        |x: CompleteStr| u32::from_str(&x)
     ),
     |value| Expression::Number(Number { value: value, width: NumberWidth::None })
 ));
@@ -270,10 +268,10 @@ fn hex_width_for_length(length: usize) -> NumberWidth {
     }
 }
 
-named!(hex_number<&str, Expression>, ws!(do_parse!(
+named!(hex_number<CompleteStr, Expression>, ws!(do_parse!(
     tag!("$") >>
     number: map!(
-        map_res!(nom::hex_digit, |s| u32::from_str_radix(s, 16).map(|value| (s.len(), value))),
+        map_res!(nom::hex_digit, |s: CompleteStr| u32::from_str_radix(&s, 16).map(|value| (s.len(), value))),
         |(length, value)| Expression::Number(Number {
             value: value,
             width: hex_width_for_length(length),
@@ -282,14 +280,14 @@ named!(hex_number<&str, Expression>, ws!(do_parse!(
     (number)
 )));
 
-named!(call<&str, Expression>, ws!(do_parse!(
+named!(call<CompleteStr, Expression>, ws!(do_parse!(
     identifier: identifier >>
     parts: delimited!(
         tag!("("),
         separated_list!(tag!(","), expression),
         tag!(")")
     ) >>
-    (Expression::Call(VariableName(identifier), parts))
+    (Expression::Call(VariableName(&identifier), parts))
 )));
 
-named!(variable<&str, Expression>, map!(label, Expression::Variable));
+named!(variable<CompleteStr, Expression>, map!(label, Expression::Variable));

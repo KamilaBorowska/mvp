@@ -1,7 +1,7 @@
 extern crate mvp;
 
 use mvp::parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, VariableName};
-use mvp::parser::grammar::{self, IResult};
+use mvp::parser::grammar::{self, CompleteStr};
 
 macro_rules! binary_op {
     (+) => { BinaryOperator::Add };
@@ -58,9 +58,9 @@ macro_rules! test {
     ($name:ident: $input:expr => $token:tt) => {
         #[test]
         fn $name() {
-            let input = $input;
+            let input = CompleteStr($input);
             let result = grammar::expression(input);
-            let expected = IResult::Done("", tree!($token));
+            let expected = Ok((CompleteStr(""), tree!($token)));
             assert_eq!(result, expected);
         }
     };
@@ -78,23 +78,23 @@ test!(invalid_hex_digit_size: " $ FeD " => 0xFED);
 
 #[test]
 fn reject_huge_numbers() {
-    let input = "2859421875392683928732568";
+    let input = CompleteStr("2859421875392683928732568");
     let result = grammar::expression(input);
     assert!(result.is_err());
 }
 
 #[test]
 fn no_function_call_tuples() {
-    let input = "f((1, 2))";
+    let input = CompleteStr("f((1, 2))");
     let result = grammar::expression(input);
-    let expected = IResult::Done("((1, 2))",
-                                 Expression::Variable(Label::Named(VariableName("f"))));
+    let expected = Ok((CompleteStr("((1, 2))"),
+                                 Expression::Variable(Label::Named(VariableName("f")))));
     assert_eq!(result, expected);
 }
 
 #[test]
 fn hex_digits_cannot_have_spaces() {
-    let input = " $ FE DC ";
+    let input = CompleteStr(" $ FE DC ");
     let result = grammar::expression(input);
-    assert_eq!(result, IResult::Done("DC ", tree!(one 0xFE)));
+    assert_eq!(result, Ok((CompleteStr("DC "), tree!(one 0xFE))));
 }
