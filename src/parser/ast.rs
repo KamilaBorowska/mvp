@@ -29,6 +29,7 @@ pub struct VariableName<'a>(pub &'a str);
 /// references.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Label<'a> {
+    Scoped(VariableName<'a>),
     Named(VariableName<'a>),
     Relative(i32),
 }

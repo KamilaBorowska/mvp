@@ -145,6 +145,25 @@ fn label_subtraction() {
                     Expression::Variable(Label::Relative(2))
                 ))
             )
-        ))
+        )),
+    )
+}
+
+#[test]
+fn scoped_labels() {
+    let input = CompleteStr(".a - .b");
+    let result = grammar::expression(input);
+    assert_eq!(
+        result,
+        Ok((
+            CompleteStr(""),
+            Expression::Binary(
+                BinaryOperator::Sub,
+                Box::new((
+                    Expression::Variable(Label::Scoped(VariableName("a"))),
+                    Expression::Variable(Label::Scoped(VariableName("b"))),
+                )),
+            ),
+        )),
     )
 }

@@ -174,7 +174,8 @@ pub assignment<CompleteStr, Statement>, ws!(do_parse!(
 )));
 
 named!(label<CompleteStr, Label>, alt!(
-    identifier => { |name| Label::Named(VariableName(name)) }
+    preceded!(char!('.'), identifier) => { |name| Label::Scoped(VariableName(name)) }
+    | identifier => { |name| Label::Named(VariableName(name)) }
     | take_while1!(|x| x == '-') => { |s: CompleteStr| Label::Relative(-(s.len() as i32)) }
     | take_while1!(|x| x == '+') => { |s: CompleteStr| Label::Relative(s.len() as i32) }
 ));
