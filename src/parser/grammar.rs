@@ -5,13 +5,15 @@
 //! argument is text left to parse, and second is retrieved AST value.
 //! `Err` means that parse did fail.
 
-use parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, Opcode, OpcodeMode,
-                  Statement, VariableName};
+use parser::ast::{
+    BinaryOperator, Expression, Label, Number, NumberWidth, Opcode, OpcodeMode, Statement,
+    VariableName,
+};
 
 use std::str::{self, FromStr};
 
-pub use nom::types::CompleteStr;
 use nom::{self, ErrorKind};
+pub use nom::{types::CompleteStr, IResult};
 use unicode_xid::UnicodeXID;
 
 fn valid_identifier_first_character(result: char) -> bool {
@@ -42,7 +44,7 @@ const OPERATORS: &'static str = "+-*/";
 /// let parsed = grammar::identifier(CompleteStr("世界"));
 /// assert_eq!(parsed, Ok((CompleteStr(""), "世界")));
 /// ```
-pub fn identifier(input: CompleteStr) -> Result<(CompleteStr, &str), nom::Err<CompleteStr>> {
+pub fn identifier(input: CompleteStr) -> IResult<CompleteStr, &str> {
     let mut indices = input.char_indices();
     match indices.next() {
         Some((_, c)) if valid_identifier_first_character(c) => {}

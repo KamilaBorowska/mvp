@@ -1,7 +1,9 @@
 extern crate mvp;
 
-use mvp::parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, Opcode, OpcodeMode,
-                       Statement, VariableName};
+use mvp::parser::ast::{
+    BinaryOperator, Expression, Label, Number, NumberWidth, Opcode, OpcodeMode, Statement,
+    VariableName,
+};
 use mvp::parser::grammar::{statement, CompleteStr};
 
 fn opcode(width: Option<u32>, mode: OpcodeMode) -> Statement {
@@ -236,9 +238,6 @@ fn prefers_move_mode() {
     let input = CompleteStr(" LDA 19 , s ");
     let result = statement(input);
     let second = Expression::Variable(Label::Named(VariableName("s")));
-    let expected = Ok((
-        CompleteStr(""),
-        opcode(None, OpcodeMode::Move { second }),
-    ));
+    let expected = Ok((CompleteStr(""), opcode(None, OpcodeMode::Move { second })));
     assert_eq!(result, expected);
 }
