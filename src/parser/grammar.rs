@@ -263,7 +263,7 @@ fn hex_width_for_length(length: usize) -> NumberWidth {
     }
 }
 
-named!(hex_number<CompleteStr, Expression>, ws!(do_parse!(
+named!(pub hex_number<CompleteStr, Expression>, ws!(do_parse!(
     char!('$') >>
     number: map!(
         map_res!(nom::hex_digit, |s: CompleteStr| u32::from_str_radix(&s, 16).map(|value| (s.len(), value))),

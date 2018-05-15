@@ -30,3 +30,8 @@ fn expression_simple(b: &mut Bencher) {
 fn expression_complex(b: &mut Bencher) {
     b.iter(|| grammar::expression(CompleteStr("($19)+2")));
 }
+
+#[bench]
+fn integer_parsing(b: &mut Bencher) {
+    b.iter(|| grammar::hex_number(CompleteStr("$19")));
+}
