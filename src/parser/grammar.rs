@@ -61,65 +61,65 @@ named!(pub statement<CompleteStr, Statement>, ws!(alt!(
 )));
 
 named!(immediate<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
-    tag!("#") >>
+    char!('#') >>
     expression: expression >>
     (expression, OpcodeMode::Immediate)
 )));
 
 named!(indirect<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
-    tag!("(") >>
+    char!('(') >>
     expression: expression >>
-    tag!(")") >>
+    char!(')') >>
     not!(one_of!(OPERATORS)) >>
     (expression, OpcodeMode::Indirect)
 )));
 
 named!(x_indirect<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
-    tag!("(") >>
+    char!('(') >>
     expression: expression >>
-    tag!(",") >>
-    one_of!("xX") >>
-    tag!(")") >>
+    char!(',') >>
+    tag_no_case!("x") >>
+    char!(')') >>
     (expression, OpcodeMode::XIndirect)
 )));
 
 named!(indirect_y<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
-    tag!("(") >>
+    char!('(') >>
     expression: expression >>
-    tag!(")") >>
-    tag!(",") >>
-    one_of!("yY") >>
+    char!(')') >>
+    char!(',') >>
+    tag_no_case!("y") >>
     (expression, OpcodeMode::IndirectY)
 )));
 
 named!(stack_indirect_y<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
-    tag!("(") >>
+    char!('(') >>
     expression: expression >>
-    tag!(",") >>
-    one_of!("sS") >>
-    tag!(")") >>
-    tag!(",") >>
-    one_of!("yY") >>
+    char!(',') >>
+    tag_no_case!("s") >>
+    char!(')') >>
+    char!(',') >>
+    tag_no_case!("y") >>
     (expression, OpcodeMode::StackIndirectY)
 )));
 
 named!(long_indirect<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
-    tag!("[") >>
+    char!('[') >>
     expression: expression >>
-    tag!("]") >>
+    char!(']') >>
     (expression, OpcodeMode::LongIndirect)
 )));
 
 named!(long_indirect_y<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     res: long_indirect >>
-    tag!(",") >>
+    char!(',') >>
     one_of!("yY") >>
     (res.0, OpcodeMode::LongIndirectY)
 )));
 
 named!(address<CompleteStr, (Expression, OpcodeMode)>, do_parse!(
     first: expression >>
-    second: opt!(preceded!(tag!(","), expression)) >>
+    second: opt!(preceded!(char!(','), expression)) >>
     (first, match second {
         Some(second) => OpcodeMode::Move { second },
         None => OpcodeMode::Address,
@@ -128,7 +128,7 @@ named!(address<CompleteStr, (Expression, OpcodeMode)>, do_parse!(
 
 named!(opcode<CompleteStr, Opcode>, ws!(do_parse!(
     opcode: identifier >>
-    width: opt!(preceded!(tag!("."), alt!(
+    width: opt!(preceded!(char!('.'), alt!(
         tag_no_case!("b") => {|_| 1}
         | tag_no_case!("w") => {|_| 2}
         | tag_no_case!("l") => {|_| 3}
@@ -173,7 +173,7 @@ named!(
 ,
 pub assignment<CompleteStr, Statement>, ws!(do_parse!(
     name: identifier >>
-    tag!("=") >>
+    char!('=') >>
     value: expression >>
     (Statement::Assignment(VariableName(&name), value))
 )));
@@ -211,8 +211,8 @@ pub expression<CompleteStr, Expression>, ws!(do_parse!(
     init: term >>
     res: fold_many0!(
         pair!(alt!(
-            tag!("+") => {|_| BinaryOperator::Add}
-            | tag!("-") => {|_| BinaryOperator::Sub}
+            char!('+') => {|_| BinaryOperator::Add}
+            | char!('-') => {|_| BinaryOperator::Sub}
         ), term),
         init,
         |first, (operator, another)| {
@@ -226,8 +226,8 @@ named!(term<CompleteStr, Expression>, do_parse!(
     init: top_expression >>
     res: fold_many0!(
         pair!(alt!(
-            tag!("*") => {|_| BinaryOperator::Mul}
-            | tag!("/") => {|_| BinaryOperator::Div}
+            char!('*') => {|_| BinaryOperator::Mul}
+            | char!('/') => {|_| BinaryOperator::Div}
         ), top_expression),
         init,
         |first, (operator, another)| {
@@ -245,7 +245,7 @@ named!(top_expression<CompleteStr, Expression>, alt!(
     variable
 ));
 
-named!(paren_expression<CompleteStr, Expression>, ws!(delimited!(tag!("("), expression, tag!(")"))));
+named!(paren_expression<CompleteStr, Expression>, ws!(delimited!(char!('('), expression, char!(')'))));
 
 named!(number<CompleteStr, Expression>, map!(
     map_res!(
@@ -264,7 +264,7 @@ fn hex_width_for_length(length: usize) -> NumberWidth {
 }
 
 named!(hex_number<CompleteStr, Expression>, ws!(do_parse!(
-    tag!("$") >>
+    char!('$') >>
     number: map!(
         map_res!(nom::hex_digit, |s: CompleteStr| u32::from_str_radix(&s, 16).map(|value| (s.len(), value))),
         |(length, value)| Expression::Number(Number {
@@ -278,9 +278,9 @@ named!(hex_number<CompleteStr, Expression>, ws!(do_parse!(
 named!(call<CompleteStr, Expression>, ws!(do_parse!(
     identifier: identifier >>
     parts: delimited!(
-        tag!("("),
-        separated_list!(tag!(","), expression),
-        tag!(")")
+        char!('('),
+        separated_list!(char!(','), expression),
+        char!(')')
     ) >>
     (Expression::Call(VariableName(&identifier), parts))
 )));
