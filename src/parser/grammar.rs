@@ -265,14 +265,10 @@ fn hex_width_for_length(length: usize) -> NumberWidth {
 
 named!(pub hex_number<CompleteStr, Expression>, ws!(do_parse!(
     char!('$') >>
-    number: map!(
-        map_res!(nom::hex_digit, |s: CompleteStr| u32::from_str_radix(&s, 16).map(|value| (s.len(), value))),
-        |(length, value)| Expression::Number(Number {
-            value: value,
-            width: hex_width_for_length(length),
-        })
-    ) >>
-    (number)
+    number: map_res!(nom::hex_digit, |s: CompleteStr| u32::from_str_radix(&s, 16).map(|value| Number {
+        value, width: hex_width_for_length(s.len()),
+    })) >>
+    (Expression::Number(number))
 )));
 
 named!(call<CompleteStr, Expression>, ws!(do_parse!(
