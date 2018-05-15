@@ -134,11 +134,11 @@ named!(opcode<CompleteStr, Opcode>, do_parse!(
         | tag_no_case!("l") => {|_| 3}
     )))) >>
     result: alt!(
-        indirect_y
+        immediate
+        | indirect_y
         | indirect
         | x_indirect
         | address
-        | immediate
         | long_indirect_y
         | long_indirect
         | stack_indirect_y
