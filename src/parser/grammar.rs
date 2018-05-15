@@ -117,16 +117,13 @@ named!(long_indirect_y<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     (res.0, OpcodeMode::LongIndirectY)
 )));
 
-named!(address_pair<CompleteStr, (Expression, OpcodeMode)>, do_parse!(
-    first: expression >>
-    tag!(",") >>
-    second: expression >>
-    (first, OpcodeMode::Move { second: second })
-));
-
 named!(address<CompleteStr, (Expression, OpcodeMode)>, do_parse!(
-    expression: expression >>
-    (expression, OpcodeMode::Address)
+    first: expression >>
+    second: opt!(preceded!(tag!(","), expression)) >>
+    (first, match second {
+        Some(second) => OpcodeMode::Move { second },
+        None => OpcodeMode::Address,
+    })
 ));
 
 named!(opcode<CompleteStr, Opcode>, do_parse!(
@@ -136,7 +133,6 @@ named!(opcode<CompleteStr, Opcode>, do_parse!(
         indirect_y |
         indirect |
         x_indirect |
-        address_pair |
         address |
         immediate |
         long_indirect_y |
