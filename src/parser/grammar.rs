@@ -140,7 +140,7 @@ named!(opcode<CompleteStr, Opcode>, do_parse!(
     ) >>
     (Opcode {
         name: &opcode,
-        width: width,
+        width,
         value: result.0,
         mode: result.1,
     })
@@ -247,7 +247,7 @@ named!(number<CompleteStr, Expression>, map!(
         ws!(nom::digit),
         |x: CompleteStr| u32::from_str(&x)
     ),
-    |value| Expression::Number(Number { value: value, width: NumberWidth::None })
+    |value| Expression::Number(Number { value, width: NumberWidth::None })
 ));
 
 fn hex_width_for_length(length: usize) -> NumberWidth {
