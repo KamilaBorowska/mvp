@@ -24,7 +24,7 @@ fn valid_later_character(c: char) -> bool {
     UnicodeXID::is_xid_continue(c) || c == '_'
 }
 
-const OPERATORS: &'static str = "+-*/";
+const OPERATORS: &str = "+-*/";
 
 /// An identifier parser.
 ///
