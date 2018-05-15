@@ -70,8 +70,12 @@ named!(indirect<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     char!('(') >>
     expression: expression >>
     char!(')') >>
+    y: opt!(ws!(pair!(char!(','), tag_no_case!("y")))) >>
     not!(one_of!(OPERATORS)) >>
-    (expression, OpcodeMode::Indirect)
+    (expression, match y {
+        Some(_) => OpcodeMode::IndirectY,
+        None => OpcodeMode::Indirect,
+    })
 )));
 
 named!(x_indirect<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
@@ -81,15 +85,6 @@ named!(x_indirect<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     tag_no_case!("x") >>
     char!(')') >>
     (expression, OpcodeMode::XIndirect)
-)));
-
-named!(indirect_y<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
-    char!('(') >>
-    expression: expression >>
-    char!(')') >>
-    char!(',') >>
-    tag_no_case!("y") >>
-    (expression, OpcodeMode::IndirectY)
 )));
 
 named!(stack_indirect_y<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
@@ -135,7 +130,6 @@ named!(opcode<CompleteStr, Opcode>, do_parse!(
     )))) >>
     result: alt!(
         immediate
-        | indirect_y
         | indirect
         | x_indirect
         | address
