@@ -126,13 +126,13 @@ named!(address<CompleteStr, (Expression, OpcodeMode)>, do_parse!(
     })
 ));
 
-named!(opcode<CompleteStr, Opcode>, ws!(do_parse!(
+named!(opcode<CompleteStr, Opcode>, do_parse!(
     opcode: identifier >>
-    width: opt!(preceded!(char!('.'), alt!(
+    width: opt!(ws!(preceded!(char!('.'), alt!(
         tag_no_case!("b") => {|_| 1}
         | tag_no_case!("w") => {|_| 2}
         | tag_no_case!("l") => {|_| 3}
-    ))) >>
+    )))) >>
     result: alt!(
         indirect_y
         | indirect
@@ -149,7 +149,7 @@ named!(opcode<CompleteStr, Opcode>, ws!(do_parse!(
         value: result.0,
         mode: result.1,
     })
-)));
+));
 
 named!(
 /// Assignment statement parser.
