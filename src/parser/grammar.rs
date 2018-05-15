@@ -13,7 +13,7 @@ use parser::ast::{
 use std::str::{self, FromStr};
 
 use nom::{self, ErrorKind};
-pub use nom::{types::CompleteStr, IResult};
+pub use nom::{types::CompleteStr, Err, IResult};
 use unicode_xid::UnicodeXID;
 
 fn valid_identifier_first_character(result: char) -> bool {
