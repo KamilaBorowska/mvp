@@ -22,6 +22,11 @@ fn address_ambiguous_parse(b: &mut Bencher) {
 }
 
 #[bench]
+fn immediate(b: &mut Bencher) {
+    b.iter(|| grammar::statement(CompleteStr("LDA #$19")));
+}
+
+#[bench]
 fn expression_simple(b: &mut Bencher) {
     b.iter(|| grammar::expression(CompleteStr("$19")));
 }
