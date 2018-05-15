@@ -10,8 +10,8 @@ use parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, Opcode
 
 use std::str::{self, FromStr};
 
-use nom::{self, ErrorKind};
 pub use nom::types::CompleteStr;
+use nom::{self, ErrorKind};
 use unicode_xid::UnicodeXID;
 
 fn valid_identifier_first_character(result: char) -> bool {

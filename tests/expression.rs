@@ -4,11 +4,21 @@ use mvp::parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, V
 use mvp::parser::grammar::{self, CompleteStr};
 
 macro_rules! binary_op {
-    (+) => { BinaryOperator::Add };
-    (-) => { BinaryOperator::Sub };
-    (*) => { BinaryOperator::Mul };
-    (/) => { BinaryOperator::Div };
-    ($ignore:tt) => { unreachable!() };
+    (+) => {
+        BinaryOperator::Add
+    };
+    (-) => {
+        BinaryOperator::Sub
+    };
+    (*) => {
+        BinaryOperator::Mul
+    };
+    (/) => {
+        BinaryOperator::Div
+    };
+    ($ignore:tt) => {
+        unreachable!()
+    };
 }
 
 macro_rules! tree_meta {
@@ -55,7 +65,7 @@ macro_rules! tree {
 }
 
 macro_rules! test {
-    ($name:ident: $input:expr => $token:tt) => {
+    ($name:ident : $input:expr => $token:tt) => {
         #[test]
         fn $name() {
             let input = CompleteStr($input);
@@ -87,8 +97,10 @@ fn reject_huge_numbers() {
 fn no_function_call_tuples() {
     let input = CompleteStr("f((1, 2))");
     let result = grammar::expression(input);
-    let expected = Ok((CompleteStr("((1, 2))"),
-                                 Expression::Variable(Label::Named(VariableName("f")))));
+    let expected = Ok((
+        CompleteStr("((1, 2))"),
+        Expression::Variable(Label::Named(VariableName("f"))),
+    ));
     assert_eq!(result, expected);
 }
 

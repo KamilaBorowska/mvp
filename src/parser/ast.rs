@@ -43,17 +43,17 @@ pub struct Opcode<'a> {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum OpcodeMode<'a> {
-    Implied, // no argument
-    Immediate, // #$
-    Address, // $
-    Indirect, // ($)
-    XIndirect, // ($,x)
-    IndirectY, // ($),y
-    StackIndirectY, // ($,s),y
-    LongIndirect, // [$]
-    LongIndirectY, // [$],y
+    Implied,                         // no argument
+    Immediate,                       // #$
+    Address,                         // $
+    Indirect,                        // ($)
+    XIndirect,                       // ($,x)
+    IndirectY,                       // ($),y
+    StackIndirectY,                  // ($,s),y
+    LongIndirect,                    // [$]
+    LongIndirectY,                   // [$],y
     Move { second: Expression<'a> }, // $,$
-    Accumulator, // A
+    Accumulator,                     // A
 }
 
 /// A single "if" block with predicate and statements.

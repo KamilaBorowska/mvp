@@ -2,18 +2,18 @@ extern crate mvp;
 
 use mvp::parser::ast::{BinaryOperator, Expression, Label, Number, NumberWidth, Opcode, OpcodeMode,
                        Statement, VariableName};
-use mvp::parser::grammar::{CompleteStr, statement};
+use mvp::parser::grammar::{statement, CompleteStr};
 
 fn opcode(width: Option<u32>, mode: OpcodeMode) -> Statement {
     Statement::Opcode(Opcode {
-                          name: "LDA",
-                          width: width,
-                          mode: mode,
-                          value: Expression::Number(Number {
-                                                        value: 19,
-                                                        width: NumberWidth::None,
-                                                    }),
-                      })
+        name: "LDA",
+        width: width,
+        mode: mode,
+        value: Expression::Number(Number {
+            value: 19,
+            width: NumberWidth::None,
+        }),
+    })
 }
 
 #[test]
@@ -38,32 +38,24 @@ fn tricky_address() {
     let result = statement(input);
     let expected = Ok((
         CompleteStr(":"),
-        Statement::Opcode(
-            Opcode {
-                name: "LDA",
-                width: None,
-                mode: OpcodeMode::Address,
-                value: Expression::Binary(
-                    BinaryOperator::Add,
-                    Box::new(
-                        (
-                            Expression::Number(
-                                Number {
-                                    value: 0x19,
-                                    width: NumberWidth::OneByte,
-                                },
-                            ),
-                            Expression::Number(
-                                Number {
-                                    value: 2,
-                                    width: NumberWidth::None,
-                                },
-                            ),
-                        ),
-                    ),
-                ),
-            },
-        ),
+        Statement::Opcode(Opcode {
+            name: "LDA",
+            width: None,
+            mode: OpcodeMode::Address,
+            value: Expression::Binary(
+                BinaryOperator::Add,
+                Box::new((
+                    Expression::Number(Number {
+                        value: 0x19,
+                        width: NumberWidth::OneByte,
+                    }),
+                    Expression::Number(Number {
+                        value: 2,
+                        width: NumberWidth::None,
+                    }),
+                )),
+            ),
+        }),
     ));
     assert_eq!(result, expected);
 }
@@ -74,32 +66,24 @@ fn tricky_address_with_spaces() {
     let result = statement(input);
     let expected = Ok((
         CompleteStr(":"),
-        Statement::Opcode(
-            Opcode {
-                name: "LDA",
-                width: None,
-                mode: OpcodeMode::Address,
-                value: Expression::Binary(
-                    BinaryOperator::Add,
-                    Box::new(
-                        (
-                            Expression::Number(
-                                Number {
-                                    value: 0x19,
-                                    width: NumberWidth::OneByte,
-                                },
-                            ),
-                            Expression::Number(
-                                Number {
-                                    value: 2,
-                                    width: NumberWidth::None,
-                                },
-                            ),
-                        ),
-                    ),
-                ),
-            },
-        ),
+        Statement::Opcode(Opcode {
+            name: "LDA",
+            width: None,
+            mode: OpcodeMode::Address,
+            value: Expression::Binary(
+                BinaryOperator::Add,
+                Box::new((
+                    Expression::Number(Number {
+                        value: 0x19,
+                        width: NumberWidth::OneByte,
+                    }),
+                    Expression::Number(Number {
+                        value: 2,
+                        width: NumberWidth::None,
+                    }),
+                )),
+            ),
+        }),
     ));
     assert_eq!(result, expected);
 }
@@ -141,7 +125,10 @@ fn x_address() {
     let input = CompleteStr("LDA 19,x:");
     let result = statement(input);
     let second = Expression::Variable(Label::Named(VariableName("x")));
-    let expected = Ok((CompleteStr(":"), opcode(None, OpcodeMode::Move { second: second })));
+    let expected = Ok((
+        CompleteStr(":"),
+        opcode(None, OpcodeMode::Move { second: second }),
+    ));
     assert_eq!(result, expected);
 }
 
@@ -150,7 +137,10 @@ fn case_insensitive_x_address() {
     let input = CompleteStr("LDA 19 , X:");
     let result = statement(input);
     let second = Expression::Variable(Label::Named(VariableName("X")));
-    let expected = Ok((CompleteStr(":"), opcode(None, OpcodeMode::Move { second: second })));
+    let expected = Ok((
+        CompleteStr(":"),
+        opcode(None, OpcodeMode::Move { second: second }),
+    ));
     assert_eq!(result, expected);
 }
 
@@ -159,7 +149,10 @@ fn y_address() {
     let input = CompleteStr("LDA 19 , y :");
     let result = statement(input);
     let second = Expression::Variable(Label::Named(VariableName("y")));
-    let expected = Ok((CompleteStr(":"), opcode(None, OpcodeMode::Move { second: second })));
+    let expected = Ok((
+        CompleteStr(":"),
+        opcode(None, OpcodeMode::Move { second: second }),
+    ));
     assert_eq!(result, expected);
 }
 
@@ -168,7 +161,10 @@ fn stack_address() {
     let input = CompleteStr(" LDA 19    ,    s  :");
     let result = statement(input);
     let second = Expression::Variable(Label::Named(VariableName("s")));
-    let expected = Ok((CompleteStr(":"), opcode(None, OpcodeMode::Move { second: second })));
+    let expected = Ok((
+        CompleteStr(":"),
+        opcode(None, OpcodeMode::Move { second: second }),
+    ));
     assert_eq!(result, expected);
 }
 
@@ -225,9 +221,12 @@ fn move_mode() {
     let input = CompleteStr(" LDA 19 , 2 ");
     let result = statement(input);
     let second = Expression::Number(Number {
-                                        value: 2,
-                                        width: NumberWidth::None,
-                                    });
-    let expected = Ok((CompleteStr(""), opcode(None, OpcodeMode::Move { second: second })));
+        value: 2,
+        width: NumberWidth::None,
+    });
+    let expected = Ok((
+        CompleteStr(""),
+        opcode(None, OpcodeMode::Move { second: second }),
+    ));
     assert_eq!(result, expected);
 }
