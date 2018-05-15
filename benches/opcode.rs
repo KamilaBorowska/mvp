@@ -10,3 +10,8 @@ use test::Bencher;
 fn address(b: &mut Bencher) {
     b.iter(|| grammar::statement(CompleteStr("LDA $19")));
 }
+
+#[bench]
+fn address_ambiguous_parse(b: &mut Bencher) {
+    b.iter(|| grammar::statement(CompleteStr("LDA ($19)+2")));
+}
