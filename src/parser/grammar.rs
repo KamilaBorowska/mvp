@@ -5,10 +5,7 @@
 //! argument is text left to parse, and second is retrieved AST value.
 //! `Err` means that parse did fail.
 
-use parser::ast::{
-    BinaryOperator, Expression, Label, Number, NumberWidth, Opcode, OpcodeMode, Statement,
-    VariableName,
-};
+use parser::ast::*;
 
 use std::str::{self, FromStr};
 
