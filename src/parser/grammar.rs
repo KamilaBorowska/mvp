@@ -16,8 +16,8 @@ use nom::{self, ErrorKind};
 pub use nom::{types::CompleteStr, Err, IResult};
 use unicode_xid::UnicodeXID;
 
-fn valid_identifier_first_character(result: char) -> bool {
-    result == '!' || result == '_' || UnicodeXID::is_xid_start(result)
+fn valid_identifier_first_character(c: char) -> bool {
+    UnicodeXID::is_xid_start(c) || c == '!' || c == '_'
 }
 
 fn valid_later_character(c: char) -> bool {
