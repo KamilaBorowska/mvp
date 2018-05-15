@@ -126,31 +126,30 @@ named!(address<CompleteStr, (Expression, OpcodeMode)>, do_parse!(
     })
 ));
 
-named!(opcode<CompleteStr, Opcode>, do_parse!(
+named!(opcode<CompleteStr, Opcode>, ws!(do_parse!(
     opcode: identifier >>
-    mode: opt!(ws!(pair!(tag!("."), one_of!("bBwWlL")))) >>
+    width: opt!(preceded!(tag!("."), alt!(
+        tag_no_case!("b") => {|_| 1}
+        | tag_no_case!("w") => {|_| 2}
+        | tag_no_case!("l") => {|_| 3}
+    ))) >>
     result: alt!(
-        indirect_y |
-        indirect |
-        x_indirect |
-        address |
-        immediate |
-        long_indirect_y |
-        long_indirect |
-        stack_indirect_y
+        indirect_y
+        | indirect
+        | x_indirect
+        | address
+        | immediate
+        | long_indirect_y
+        | long_indirect
+        | stack_indirect_y
     ) >>
     (Opcode {
         name: &opcode,
-        width: mode.map(|(_, letter)| match letter {
-            'b'|'B' => 1,
-            'w'|'W' => 2,
-            'l'|'L' => 3,
-            _ => unreachable!(),
-        }),
+        width: width,
         value: result.0,
         mode: result.1,
     })
-));
+)));
 
 named!(
 /// Assignment statement parser.
