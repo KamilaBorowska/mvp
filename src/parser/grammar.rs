@@ -70,12 +70,11 @@ named!(indirect<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
     char!('(') >>
     expression: expression >>
     char!(')') >>
-    y: opt!(ws!(pair!(char!(','), tag_no_case!("y")))) >>
-    not!(one_of!(OPERATORS)) >>
-    (expression, match y {
-        Some(_) => OpcodeMode::IndirectY,
-        None => OpcodeMode::Indirect,
-    })
+    y: alt!(
+        pair!(char!(','), tag_no_case!("y")) => { |_| OpcodeMode::IndirectY }
+        | not!(one_of!(OPERATORS)) => { |_| OpcodeMode::Indirect }
+    ) >>
+    (expression, y)
 )));
 
 named!(x_indirect<CompleteStr, (Expression, OpcodeMode)>, ws!(do_parse!(
