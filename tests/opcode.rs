@@ -230,3 +230,15 @@ fn move_mode() {
     ));
     assert_eq!(result, expected);
 }
+
+#[test]
+fn prefers_move_mode() {
+    let input = CompleteStr(" LDA 19 , s ");
+    let result = statement(input);
+    let second = Expression::Variable(Label::Named(VariableName("s")));
+    let expected = Ok((
+        CompleteStr(""),
+        opcode(None, OpcodeMode::Move { second }),
+    ));
+    assert_eq!(result, expected);
+}
