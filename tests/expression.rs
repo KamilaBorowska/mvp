@@ -129,3 +129,22 @@ fn label_math() {
         ))
     )
 }
+
+#[test]
+fn label_subtraction() {
+    let input = CompleteStr(" +-++ ");
+    let result = grammar::expression(input);
+    assert_eq!(
+        result,
+        Ok((
+            CompleteStr(""),
+            Expression::Binary(
+                BinaryOperator::Sub,
+                Box::new((
+                    Expression::Variable(Label::Relative(1)),
+                    Expression::Variable(Label::Relative(2))
+                ))
+            )
+        ))
+    )
+}
