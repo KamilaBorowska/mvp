@@ -110,3 +110,22 @@ fn hex_digits_cannot_have_spaces() {
     let result = grammar::expression(input);
     assert_eq!(result, Ok((CompleteStr("DC "), tree!(one 0xFE))));
 }
+
+#[test]
+fn label_math() {
+    let input = CompleteStr("+ + ++");
+    let result = grammar::expression(input);
+    assert_eq!(
+        result,
+        Ok((
+            CompleteStr(""),
+            Expression::Binary(
+                BinaryOperator::Add,
+                Box::new((
+                    Expression::Variable(Label::Relative(1)),
+                    Expression::Variable(Label::Relative(2))
+                ))
+            )
+        ))
+    )
+}

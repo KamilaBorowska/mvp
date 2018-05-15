@@ -173,7 +173,11 @@ pub assignment<CompleteStr, Statement>, ws!(do_parse!(
     (Statement::Assignment(VariableName(&name), value))
 )));
 
-named!(label<CompleteStr, Label>, map!(identifier, |name| Label::Named(VariableName(&name))));
+named!(label<CompleteStr, Label>, alt!(
+    identifier => { |name| Label::Named(VariableName(name)) }
+    | take_while1!(|x| x == '-') => { |s: CompleteStr| Label::Relative(-(s.len() as i32)) }
+    | take_while1!(|x| x == '+') => { |s: CompleteStr| Label::Relative(s.len() as i32) }
+));
 
 named!(
 /// An expression parser.
@@ -232,13 +236,13 @@ named!(term<CompleteStr, Expression>, do_parse!(
     (res)
 ));
 
-named!(top_expression<CompleteStr, Expression>, alt!(
-    paren_expression |
-    number |
-    hex_number |
-    call |
-    variable
-));
+named!(top_expression<CompleteStr, Expression>, ws!(alt!(
+    paren_expression
+    | number
+    | hex_number
+    | call
+    | variable
+)));
 
 named!(paren_expression<CompleteStr, Expression>, ws!(delimited!(char!('('), expression, char!(')'))));
 
